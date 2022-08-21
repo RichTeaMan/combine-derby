@@ -209,10 +209,10 @@ pub fn spawn_combine_wheel(
         })
         .insert(RigidBody::Dynamic)
         .insert(Collider::cuboid(4.6, 4.0, 9.0))
-        .insert(ColliderMassProperties::Density(26.0))
+        .insert(ColliderMassProperties::Density(20.0))
         .insert(Damping {
-            linear_damping: 0.5,
-            angular_damping: 7.0,
+            linear_damping: 0.2,
+            angular_damping: 4.0,
         })
         .with_children(|parent| {
             /*parent.spawn_bundle(SceneBundle {
@@ -280,6 +280,8 @@ pub fn spawn_combine_wheel(
 
     let wheel_restitution = 0.1;
 
+    let wheel_friction = 1.0;
+
     let wheel_0_entity = commands
         .spawn()
         .insert_bundle(SpatialBundle::from(Transform::from_xyz(0.0, 0.0, 0.0)))
@@ -292,7 +294,8 @@ pub fn spawn_combine_wheel(
                     90.0_f32.to_radians(),
                 )))
                 .insert(Collider::round_cylinder(0.5, 2.0, 0.25))
-                .insert(Restitution::coefficient(wheel_restitution));
+                .insert(Restitution::coefficient(wheel_restitution))
+                .insert(Friction::coefficient(wheel_friction));
 
             parent.spawn_bundle(SceneBundle {
                 scene: wheel_gltf.clone(),
@@ -316,7 +319,8 @@ pub fn spawn_combine_wheel(
                     90.0_f32.to_radians(),
                 )))
                 .insert(Collider::round_cylinder(0.5, 2.0, 0.25))
-                .insert(Restitution::coefficient(wheel_restitution));
+                .insert(Restitution::coefficient(wheel_restitution))
+                .insert(Friction::coefficient(wheel_friction));
 
             parent.spawn_bundle(SceneBundle {
                 scene: wheel_gltf.clone(),
@@ -340,7 +344,8 @@ pub fn spawn_combine_wheel(
                     90.0_f32.to_radians(),
                 )))
                 .insert(Collider::round_cylinder(0.5, 2.0, 0.25))
-                .insert(Restitution::coefficient(wheel_restitution));
+                .insert(Restitution::coefficient(wheel_restitution))
+                .insert(Friction::coefficient(wheel_friction));
 
             parent.spawn_bundle(SceneBundle {
                 scene: wheel_gltf.clone(),
@@ -364,7 +369,8 @@ pub fn spawn_combine_wheel(
                     90.0_f32.to_radians(),
                 )))
                 .insert(Collider::round_cylinder(0.5, 2.0, 0.25))
-                .insert(Restitution::coefficient(wheel_restitution));
+                .insert(Restitution::coefficient(wheel_restitution))
+                .insert(Friction::coefficient(wheel_friction));
 
             parent.spawn_bundle(SceneBundle {
                 scene: wheel_gltf,
@@ -390,7 +396,7 @@ pub fn spawn_combine_wheel(
     let x = Vec3::X;
     let z = Vec3::Z;
 
-    let velocity = 15.0;
+    let velocity = 0.0;
     let max_force = f32::MAX; // 10000000.0;
 
     let factor = 0.0;
@@ -438,3 +444,6 @@ pub fn spawn_combine_wheel(
         .entity(wheel_3_entity)
         .insert(ImpulseJoint::new(body_entity, revs[3]));
 }
+
+#[derive(Component)]
+pub struct Motor;

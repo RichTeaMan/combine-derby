@@ -8,7 +8,7 @@ use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 use camera::{SwitchCameraEvent, camera_events};
 use combine::{spawn_combine, spawn_combine_wheel};
-use control::control_events;
+use control::{ control_events};
 use events::ControlEvent;
 use input::keyboard_input;
 
