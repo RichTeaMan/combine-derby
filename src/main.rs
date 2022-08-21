@@ -7,7 +7,7 @@ mod input;
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 use camera::{SwitchCameraEvent, camera_events};
-use combine::spawn_combine;
+use combine::{spawn_combine, spawn_combine_wheel};
 use control::control_events;
 use events::ControlEvent;
 use input::keyboard_input;
@@ -26,7 +26,7 @@ fn main() {
         .add_event::<SwitchCameraEvent>()
         //.add_startup_system(setup_graphics)
         .add_startup_system(setup_physics)
-        .add_startup_system(spawn_combine)
+        .add_startup_system(spawn_combine_wheel)
         .add_startup_system(camera::spawn_camera)
         .add_system(camera::pan_orbit_camera)
         //.add_system(update_camera)
@@ -129,12 +129,4 @@ fn setup_physics(
         base_color: Color::rgb(1.0, 0.0, 0.0),
         ..default()
     });
-    commands
-        .spawn_bundle(PbrBundle {
-            mesh: sphere_handle.clone(),
-            material: red_material_handle.clone(),
-            transform: Transform::from_xyz(0.0, 0.0, 0.0),
-            ..default()
-        })
-        .insert(DebugPointer);
 }
