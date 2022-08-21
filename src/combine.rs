@@ -31,7 +31,17 @@ pub fn spawn_combine(
         ..default()
     });
 
-    commands
+    /*
+        let x = Vector::x_axis();
+    let joint = RevoluteJointBuilder::new(x)
+        .local_anchor1(Vec3::new(0.0, 0.0, 1.0))
+        .local_anchor2(Vec3::new(0.0, 0.0, -3.0));
+    commands.spawn()
+        .insert(RigidBody::Dynamic)
+        .insert(ImpulseJoint::new(parent_entity, joint));
+        */
+
+    let body_entity = commands
         .spawn()
         .insert_bundle(SpatialBundle::from(Transform::from_xyz(0.0, 2.0, 0.0)))
         .insert(Restitution::coefficient(0.7))
@@ -51,7 +61,7 @@ pub fn spawn_combine(
             steering_force: 12000000.0,
         })
         .insert(RigidBody::Dynamic)
-        .insert(Collider::cuboid(4.6, 4.0, 9.0))
+        //.insert(Collider::cuboid(4.6, 4.0, 9.0))
         .insert(ColliderMassProperties::Density(26.0))
         .insert(Damping {
             linear_damping: 0.5,
@@ -65,29 +75,86 @@ pub fn spawn_combine(
                     .with_scale(Vec3::new(2.0, 2.0, 2.0)),
                 ..Default::default()
             });
-
+            /*
             parent.spawn_bundle(SceneBundle {
                 scene: wheel_gltf,
                 transform: Transform::from_xyz(-2.0, -1.0, 2.0)
                     .with_rotation(Quat::from_rotation_y(90.0_f32.to_radians()))
                     .with_scale(Vec3::new(2.0, 2.0, 2.0)),
                 ..Default::default()
+            });*/
+
+            parent.spawn_bundle(PbrBundle {
+                mesh: sphere_handle.clone(),
+                material: red_material_handle.clone(),
+                transform: Transform::from_xyz(0.0, 0.0, -20.0),
+                ..default()
             });
 
             parent
-                .spawn_bundle(PbrBundle {
-                    mesh: sphere_handle.clone(),
-                    material: red_material_handle.clone(),
-                    transform: Transform::from_xyz(0.0, 0.0, -20.0),
-                    ..default()
+                .spawn_bundle(Camera3dBundle {
+                    transform: Transform::from_xyz(0.0, 20.0, 30.0)
+                        .with_rotation(Quat::from_rotation_x(-0.4)),
+                    ..Default::default()
                 })
                 .insert(CombineCamera);
         })
         .id();
 
-            parent.spawn_bundle(Camera3dBundle {
-                transform: Transform::from_xyz(0.0, 20.0, 30.0).with_rotation(Quat::from_rotation_x(-0.4)),
-                ..Default::default()
-            });
-        });
+    let wheel_1_entity = commands
+        .spawn_bundle(TransformBundle::from(
+            Transform::from_xyz(0.0, 20.0, 0.0)
+                //.with_rotation(Quat::from_rotation_z(90.0_f32.to_radians())),
+        ))
+     //   .with_children(|c_parent| {
+        //    c_parent
+        //        .spawn()
+                .insert_bundle(SpatialBundle::from(
+                    Transform::from_xyz(20.0, 20.0, 0.0), //    .with_rotation(Quat::from_rotation_x(-90.0_f32.to_radians()))
+                                                         //    .with_rotation(Quat::from_rotation_y(-90.0_f32.to_radians()))
+                                                         //    .with_rotation(Quat::from_rotation_z(90.0_f32.to_radians()))
+                ))
+                .insert(Restitution::coefficient(0.7))
+                .insert(RigidBody::Dynamic)
+                .insert(Collider::round_cylinder(0.25, 2.0, 0.25))
+                .insert(ColliderMassProperties::Density(2.0))
+                .with_children(|parent| {
+                    parent.spawn_bundle(SceneBundle {
+                        scene: wheel_gltf,
+                        transform: Transform::from_xyz(0.0, 0.0, 0.0)
+                            .with_rotation(Quat::from_rotation_x(90.0_f32.to_radians()))
+                            .with_scale(Vec3::new(2.0, 2.0, 2.0)),
+                        ..Default::default()
+                    });
+                })
+    //    ;})
+        .id();
+    let x_shift_1 = 6.5;
+    //let y_shift_1 = -1.0;
+    let y_shift_1 = 10.0;
+    let z_shift_1 = 6.0;
+
+    let x_shift_2 = 0.0;
+    let y_shift_2 = 0.0;
+    let z_shift_2 = 0.0;
+    //let shift = 0.0;
+
+    // Setup four joints.
+    let x = Vec3::X;
+    let z = Vec3::Z;
+
+    let revs = [
+        RevoluteJointBuilder::new(x)
+            .local_anchor1(Vec3::new(x_shift_1, y_shift_1, z_shift_1))
+            //.local_anchor1(Transform::from_xyz(0.0,0.0,0.0))
+            .local_anchor2(Vec3::new(x_shift_2, y_shift_2, -z_shift_2))
+            .motor_velocity(1.0, 1.0),
+        //RevoluteJointBuilder::new(x).local_anchor2(Vec3::new(-z_shift, 0.0, 0.0)),
+        //RevoluteJointBuilder::new(z).local_anchor2(Vec3::new(0.0, 0.0, -z_shift)),
+        //RevoluteJointBuilder::new(x).local_anchor2(Vec3::new(z_shift, 0.0, 0.0)),
+    ];
+
+ //   commands
+ //       .entity(wheel_1_entity)
+ //       .insert(ImpulseJoint::new(body_entity, revs[0]));
 }
