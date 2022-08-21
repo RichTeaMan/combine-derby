@@ -141,6 +141,10 @@ pub fn spawn_camera(mut commands: Commands) {
     commands
         .spawn_bundle(Camera3dBundle {
             transform: start_transform,
+            camera: Camera {
+                is_active: false,
+                ..Default::default()
+            },
             ..Default::default()
         })
         .insert(pan_orbit)

@@ -19,7 +19,8 @@ pub fn spawn_combine(
     asset_server: Res<AssetServer>,
 ) {
     // note that we have to include the `Scene0` label
-    let my_gltf: Handle<Scene> = asset_server.load("basic-combine-body.glb#Scene0");
+    let body_gltf: Handle<Scene> = asset_server.load("basic-combine-body.glb#Scene0");
+    let wheel_gltf: Handle<Scene> = asset_server.load("basic-wheel.glb#Scene0");
 
     let sphere_handle = meshes.add(Mesh::from(shape::UVSphere {
         radius: 2.0,
@@ -59,8 +60,16 @@ pub fn spawn_combine(
         })
         .with_children(|parent| {
             parent.spawn_bundle(SceneBundle {
-                scene: my_gltf,
+                scene: body_gltf,
                 transform: Transform::from_xyz(0.0, -1.7, 0.0)
+                    .with_rotation(Quat::from_rotation_y(90.0_f32.to_radians()))
+                    .with_scale(Vec3::new(2.0, 2.0, 2.0)),
+                ..Default::default()
+            });
+
+            parent.spawn_bundle(SceneBundle {
+                scene: wheel_gltf,
+                transform: Transform::from_xyz(-2.0, -1.0, 2.0)
                     .with_rotation(Quat::from_rotation_y(90.0_f32.to_radians()))
                     .with_scale(Vec3::new(2.0, 2.0, 2.0)),
                 ..Default::default()
