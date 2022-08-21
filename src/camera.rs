@@ -7,7 +7,10 @@ use bevy::{
 };
 
 #[derive(Component)]
-pub struct PlayerCamera;
+pub struct FreeCamera;
+
+#[derive(Component)]
+pub struct CombineCamera;
 
 /// Tags an entity as capable of panning and orbiting.
 #[derive(Component)]
@@ -17,6 +20,8 @@ pub struct PanOrbitCamera {
     pub radius: f32,
     pub upside_down: bool,
 }
+
+pub struct SwitchCameraEvent;
 
 impl Default for PanOrbitCamera {
     fn default() -> Self {
@@ -148,5 +153,19 @@ pub fn spawn_camera(mut commands: Commands) {
             ..Default::default()
         })
         .insert(pan_orbit)
-        .insert(PlayerCamera);
+        .insert(FreeCamera);
+}
+
+pub fn camera_events(
+    mut events: EventReader<SwitchCameraEvent>,
+    mut free_camera_query: Query<(&FreeCamera, &mut Camera, Without<CombineCamera>)>,
+    mut combine_camera_query: Query<(&CombineCamera, &mut Camera, Without<FreeCamera>)>,
+) {
+    for _ in events.iter() {
+        let mut free_camera = free_camera_query.single_mut().1;
+        let mut combine_camera = combine_camera_query.single_mut().1;
+
+        free_camera.is_active = !free_camera.is_active;
+        combine_camera.is_active = !combine_camera.is_active;
+    }
 }

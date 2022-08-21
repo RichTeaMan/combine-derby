@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
+use crate::camera::CombineCamera;
+
 #[derive(Component, Default)]
 pub struct Combine {
     pub player_controlled: bool,
@@ -8,9 +10,6 @@ pub struct Combine {
     pub reverse_engine_force: f32,
     pub steering_force: f32,
 }
-
-#[derive(Component)]
-pub struct CameraTarget;
 
 pub fn spawn_combine(
     mut commands: Commands,
@@ -82,7 +81,9 @@ pub fn spawn_combine(
                     transform: Transform::from_xyz(0.0, 0.0, -20.0),
                     ..default()
                 })
-                .insert(CameraTarget);
+                .insert(CombineCamera);
+        })
+        .id();
 
             parent.spawn_bundle(Camera3dBundle {
                 transform: Transform::from_xyz(0.0, 20.0, 30.0).with_rotation(Quat::from_rotation_x(-0.4)),

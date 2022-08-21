@@ -2,10 +2,8 @@ use bevy::prelude::*;
 use bevy_rapier3d::prelude::ExternalForce;
 
 use crate::{
-    camera::PanOrbitCamera,
-    combine::{CameraTarget, Combine},
+    combine::Combine,
     events::{Control, ControlEvent},
-    DebugPointer,
 };
 
 pub fn control_events(
@@ -37,7 +35,6 @@ pub fn control_events(
 
                 Control::Left => {
                     external_force.torque = Vec3::new(0.0, combine.steering_force, 0.0);
-                    info!("left");
                 }
                 Control::Right => {
                     external_force.torque = Vec3::new(0.0, -combine.steering_force, 0.0);

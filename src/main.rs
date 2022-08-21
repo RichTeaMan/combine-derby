@@ -6,6 +6,7 @@ mod input;
 
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
+use camera::{SwitchCameraEvent, camera_events};
 use combine::spawn_combine;
 use control::control_events;
 use events::ControlEvent;
@@ -22,6 +23,7 @@ fn main() {
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugin(RapierDebugRenderPlugin::default())
         .add_event::<ControlEvent>()
+        .add_event::<SwitchCameraEvent>()
         //.add_startup_system(setup_graphics)
         .add_startup_system(setup_physics)
         .add_startup_system(spawn_combine)
@@ -32,6 +34,7 @@ fn main() {
         .add_system(bevy::window::close_on_esc)
         .add_system(keyboard_input)
         .add_system(control_events)
+        .add_system(camera_events)
         .run();
 }
 fn setup_physics(
