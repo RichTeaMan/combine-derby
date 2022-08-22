@@ -31,8 +31,8 @@ pub fn keyboard_input(
         camera_events.send(SwitchCameraEvent);
     }
 
-    if keys.just_pressed(KeyCode::Space) {
-        // Space was pressed
+    if keys.pressed(KeyCode::Space) {
+        speed_control_events.send(SpeedControlEvent::Brake);
     }
     if keys.just_released(KeyCode::LControl) {
         // Left Ctrl was released

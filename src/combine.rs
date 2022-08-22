@@ -61,7 +61,7 @@ pub fn spawn_combine(mut commands: Commands, asset_server: Res<AssetServer>) {
         .with_children(|parent| {
             parent.spawn_bundle(SceneBundle {
                 scene: body_gltf,
-                transform: Transform::from_xyz(0.0, -1.7, 0.0)
+                transform: Transform::from_xyz(0.0, -3.1, 0.0)
                     .with_rotation(Quat::from_rotation_y(90.0_f32.to_radians()))
                     .with_scale(Vec3::new(2.0, 2.0, 2.0)),
                 ..Default::default()
@@ -69,7 +69,7 @@ pub fn spawn_combine(mut commands: Commands, asset_server: Res<AssetServer>) {
 
             parent
                 .spawn_bundle(Camera3dBundle {
-                    transform: Transform::from_xyz(0.0, 20.0, 30.0)
+                    transform: Transform::from_xyz(0.0, 20.0, 40.0)
                         .with_rotation(Quat::from_rotation_x(-0.4)),
                     ..Default::default()
                 })
@@ -77,9 +77,9 @@ pub fn spawn_combine(mut commands: Commands, asset_server: Res<AssetServer>) {
         })
         .id();
 
-    let wheel_restitution = 0.1;
+    let wheel_restitution = 0.3;
 
-    let wheel_friction = 1.0;
+    let wheel_friction = 0.8;
 
     let wheel_0_entity = commands
         .spawn()
@@ -199,7 +199,8 @@ pub fn spawn_combine(mut commands: Commands, asset_server: Res<AssetServer>) {
     let x_shift_1 = 6.5;
     let y_shift_1 = 4.0;
     //let y_shift_1 = -20.0;
-    let z_shift_1 = 16.0;
+    let z_shift_1 = 8.0;
+    let z_shift_rear = 5.0;
 
     let x_shift_2 = 0.0;
     let y_shift_2 = 0.0;
@@ -207,7 +208,7 @@ pub fn spawn_combine(mut commands: Commands, asset_server: Res<AssetServer>) {
     let x = Vec3::X;
 
     let velocity = 0.0;
-    let max_force = f32::MAX / 2.0;
+    let max_force = 50000.0; // f32::MAX / 2.0;
     let max_steer_force = f32::MAX;
 
     let factor = 0.0;
@@ -236,13 +237,13 @@ pub fn spawn_combine(mut commands: Commands, asset_server: Res<AssetServer>) {
     ];
 
     let steering_left_joint = RevoluteJointBuilder::new(Vec3::Y)
-        .local_anchor1(Vec3::new(x_shift_1, -y_shift_1, z_shift_1))
+        .local_anchor1(Vec3::new(x_shift_1, -y_shift_1, z_shift_rear))
         .local_anchor2(Vec3::new(x_shift_2, y_shift_2, z_shift_2))
         .motor_position(0.0, 0.5, 0.5)
         .motor_max_force(max_steer_force);
 
     let steering_right_joint = RevoluteJointBuilder::new(Vec3::Y)
-        .local_anchor1(Vec3::new(-x_shift_1, -y_shift_1, z_shift_1))
+        .local_anchor1(Vec3::new(-x_shift_1, -y_shift_1, z_shift_rear))
         .local_anchor2(Vec3::new(x_shift_2, y_shift_2, z_shift_2))
         .motor_position(0.0, 0.5, 0.5)
         .motor_max_force(max_steer_force);

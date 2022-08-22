@@ -70,7 +70,7 @@ fn setup_physics(
             ground_y_position,
             0.0,
         )))
-        .insert(Friction::coefficient(1.0));
+        .insert(Friction::coefficient(0.7));
 
     let tile_count = (PLANE_SIZE / TILE_SIZE) as i32;
     for i in -tile_count..tile_count {
