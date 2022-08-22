@@ -1,14 +1,11 @@
-use bevy::prelude::*;
-
-pub enum Control {
+pub enum SpeedControlEvent {
     Forward,
+    Back,
+    NoPower,
+}
+
+pub enum SteerControlEvent {
     Left,
     NoSteer,
     Right,
-    Back,
-    NoPower
 }
-pub struct ControlEvent {
-    pub control: Control
-}
-

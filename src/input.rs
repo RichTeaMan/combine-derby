@@ -2,40 +2,29 @@ use bevy::prelude::*;
 
 use crate::{
     camera::SwitchCameraEvent,
-    events::{Control, ControlEvent},
+    events::{SpeedControlEvent, SteerControlEvent},
 };
 
 pub fn keyboard_input(
     keys: Res<Input<KeyCode>>,
-    mut control_events: ResMut<Events<ControlEvent>>,
+    mut speed_control_events: ResMut<Events<SpeedControlEvent>>,
+    mut steer_control_events: ResMut<Events<SteerControlEvent>>,
     mut camera_events: ResMut<Events<SwitchCameraEvent>>,
 ) {
     if keys.pressed(KeyCode::W) {
-        control_events.send(ControlEvent {
-            control: Control::Forward,
-        });
+        speed_control_events.send(SpeedControlEvent::Forward);
     } else if keys.pressed(KeyCode::S) {
-        control_events.send(ControlEvent {
-            control: Control::Back,
-        });
+        speed_control_events.send(SpeedControlEvent::Back);
     } else {
-        control_events.send(ControlEvent {
-            control: Control::NoPower,
-        });
+        speed_control_events.send(SpeedControlEvent::NoPower);
     }
 
     if keys.pressed(KeyCode::A) {
-        control_events.send(ControlEvent {
-            control: Control::Left,
-        });
+        steer_control_events.send(SteerControlEvent::Left);
     } else if keys.pressed(KeyCode::D) {
-        control_events.send(ControlEvent {
-            control: Control::Right,
-        });
+        steer_control_events.send(SteerControlEvent::Right);
     } else {
-        control_events.send(ControlEvent {
-            control: Control::NoSteer,
-        })
+        steer_control_events.send(SteerControlEvent::NoSteer);
     }
 
     if keys.just_pressed(KeyCode::F4) {

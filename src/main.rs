@@ -6,10 +6,11 @@ mod input;
 
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
-use camera::{SwitchCameraEvent, camera_events};
-use combine::{spawn_combine, spawn_combine_wheel};
-use control::{ control_events};
-use events::ControlEvent;
+use camera::{camera_events, SwitchCameraEvent};
+use combine::spawn_combine;
+
+use control::{speed_control_events, steer_control_events};
+use events::{SpeedControlEvent, SteerControlEvent};
 use input::keyboard_input;
 
 const PLANE_SIZE: f32 = 1000.0;
@@ -22,18 +23,20 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugin(RapierDebugRenderPlugin::default())
-        .add_event::<ControlEvent>()
+        .add_event::<SpeedControlEvent>()
+        .add_event::<SteerControlEvent>()
         .add_event::<SwitchCameraEvent>()
         //.add_startup_system(setup_graphics)
         .add_startup_system(setup_physics)
-        .add_startup_system(spawn_combine_wheel)
+        .add_startup_system(spawn_combine)
         .add_startup_system(camera::spawn_camera)
         .add_system(camera::pan_orbit_camera)
         //.add_system(update_camera)
         //.add_system(move_camera)
         .add_system(bevy::window::close_on_esc)
         .add_system(keyboard_input)
-        .add_system(control_events)
+        .add_system(speed_control_events)
+        .add_system(steer_control_events)
         .add_system(camera_events)
         .run();
 }
@@ -66,7 +69,8 @@ fn setup_physics(
             0.0,
             ground_y_position,
             0.0,
-        )));
+        )))
+        .insert(Friction::coefficient(1.0));
 
     let tile_count = (PLANE_SIZE / TILE_SIZE) as i32;
     for i in -tile_count..tile_count {
@@ -117,16 +121,6 @@ fn setup_physics(
             rotation: Quat::from_rotation_x(-std::f32::consts::FRAC_PI_4),
             ..default()
         },
-        ..default()
-    });
-
-    let sphere_handle = meshes.add(Mesh::from(shape::UVSphere {
-        radius: 2.0,
-        sectors: 2,
-        stacks: 2,
-    }));
-    let red_material_handle = materials.add(StandardMaterial {
-        base_color: Color::rgb(1.0, 0.0, 0.0),
         ..default()
     });
 }
