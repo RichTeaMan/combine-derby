@@ -78,14 +78,13 @@ pub fn spawn_combine(mut commands: Commands, asset_server: Res<AssetServer>) {
         .id();
 
     let wheel_restitution = 0.3;
-
-    let wheel_friction = 0.8;
+    let wheel_friction = 1.0;
+    let wheel_density = 9.0;
 
     let wheel_0_entity = commands
         .spawn()
         .insert_bundle(SpatialBundle::from(Transform::from_xyz(0.0, 0.0, 0.0)))
         .insert(physics)
-        .insert(ColliderMassProperties::Density(2.0))
         .with_children(|parent| {
             parent
                 .spawn()
@@ -94,7 +93,8 @@ pub fn spawn_combine(mut commands: Commands, asset_server: Res<AssetServer>) {
                 )))
                 .insert(Collider::round_cylinder(0.5, 2.0, 0.25))
                 .insert(Restitution::coefficient(wheel_restitution))
-                .insert(Friction::coefficient(wheel_friction));
+                .insert(Friction::coefficient(wheel_friction))
+                .insert(ColliderMassProperties::Density(wheel_density));
 
             parent.spawn_bundle(SceneBundle {
                 scene: wheel_gltf.clone(),
@@ -110,7 +110,6 @@ pub fn spawn_combine(mut commands: Commands, asset_server: Res<AssetServer>) {
         .spawn()
         .insert_bundle(SpatialBundle::from(Transform::from_xyz(0.0, 0.0, 0.0)))
         .insert(physics)
-        .insert(ColliderMassProperties::Density(2.0))
         .with_children(|parent| {
             parent
                 .spawn()
@@ -119,7 +118,8 @@ pub fn spawn_combine(mut commands: Commands, asset_server: Res<AssetServer>) {
                 )))
                 .insert(Collider::round_cylinder(0.5, 2.0, 0.25))
                 .insert(Restitution::coefficient(wheel_restitution))
-                .insert(Friction::coefficient(wheel_friction));
+                .insert(Friction::coefficient(wheel_friction))
+                .insert(ColliderMassProperties::Density(wheel_density));
 
             parent.spawn_bundle(SceneBundle {
                 scene: wheel_gltf.clone(),
@@ -135,7 +135,6 @@ pub fn spawn_combine(mut commands: Commands, asset_server: Res<AssetServer>) {
         .spawn()
         .insert_bundle(SpatialBundle::from(Transform::from_xyz(0.0, 0.0, 0.0)))
         .insert(physics)
-        .insert(ColliderMassProperties::Density(0.5))
         .with_children(|parent| {
             parent
                 .spawn()
@@ -144,8 +143,8 @@ pub fn spawn_combine(mut commands: Commands, asset_server: Res<AssetServer>) {
                 )))
                 .insert(Collider::round_cylinder(0.5, 2.0, 0.25))
                 .insert(Restitution::coefficient(wheel_restitution))
-                .insert(ColliderMassProperties::Density(0.5))
-                .insert(Friction::coefficient(wheel_friction));
+                .insert(Friction::coefficient(wheel_friction))
+                .insert(ColliderMassProperties::Density(wheel_density));
 
             parent.spawn_bundle(SceneBundle {
                 scene: wheel_gltf.clone(),
@@ -161,7 +160,6 @@ pub fn spawn_combine(mut commands: Commands, asset_server: Res<AssetServer>) {
         .spawn()
         .insert_bundle(SpatialBundle::from(Transform::from_xyz(0.0, 0.0, 0.0)))
         .insert(physics)
-        .insert(ColliderMassProperties::Density(2.0))
         .with_children(|parent| {
             parent
                 .spawn()
@@ -170,7 +168,8 @@ pub fn spawn_combine(mut commands: Commands, asset_server: Res<AssetServer>) {
                 )))
                 .insert(Collider::round_cylinder(0.5, 2.0, 0.25))
                 .insert(Restitution::coefficient(wheel_restitution))
-                .insert(Friction::coefficient(wheel_friction));
+                .insert(Friction::coefficient(wheel_friction))
+                .insert(ColliderMassProperties::Density(wheel_density));
 
             parent.spawn_bundle(SceneBundle {
                 scene: wheel_gltf,

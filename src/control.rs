@@ -6,23 +6,24 @@ use crate::{
     events::{SpeedControlEvent, SteerControlEvent},
 };
 
-
 pub fn speed_control_events(
     mut speed_control_events: EventReader<SpeedControlEvent>,
     mut query: Query<(&DrivingWheel, &mut MultibodyJoint)>,
 ) {
-    let target_velocity = 30.0;
+    let target_velocity = 50.0;
     let factor = 1.0;
 
     for event in speed_control_events.iter() {
         for mut q in query.iter_mut() {
             match event {
                 SpeedControlEvent::Forward => {
-                    q.1.data.set_motor_velocity(JointAxis::AngX, -target_velocity, factor);
+                    q.1.data
+                        .set_motor_velocity(JointAxis::AngX, -target_velocity, factor);
                     q.1.data.set_limits(JointAxis::AngX, [f32::MIN, f32::MAX]);
                 }
                 SpeedControlEvent::Back => {
-                    q.1.data.set_motor_velocity(JointAxis::AngX, target_velocity, factor);
+                    q.1.data
+                        .set_motor_velocity(JointAxis::AngX, target_velocity / 2.0, factor);
                     q.1.data.set_limits(JointAxis::AngX, [f32::MIN, f32::MAX]);
                 }
                 SpeedControlEvent::NoPower => {
