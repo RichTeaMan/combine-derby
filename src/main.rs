@@ -4,6 +4,7 @@ mod config;
 mod control;
 mod events;
 mod input;
+mod obstacle;
 mod ui;
 
 use bevy::{diagnostic::FrameTimeDiagnosticsPlugin, prelude::*};
@@ -15,6 +16,7 @@ use control::{speed_control_events, steer_control_events};
 use events::{SpeedControlEvent, SteerControlEvent};
 use input::keyboard_input;
 
+use obstacle::spawn_hay_bales;
 use rand::prelude::*;
 use ui::{change_text_system, infotext_system, update_debug_ui_system};
 
@@ -34,6 +36,7 @@ fn main() {
         .add_startup_system(spawn_combine)
         .add_startup_system(camera::spawn_camera)
         .add_startup_system(infotext_system)
+        .add_startup_system(spawn_hay_bales)
         .add_system(camera::pan_orbit_camera)
         //.add_system(update_camera)
         //.add_system(move_camera)
@@ -196,7 +199,7 @@ fn setup_physics(
     /* Create the bouncing balls. */
     let plane_range = -(PLANE_SIZE / 2.0)..(PLANE_SIZE / 2.0);
     let radius_range = 1.0..10.0;
-    for _ in 0..50 {
+    for _ in 0..10 {
         let x: f32 = rng.gen_range(plane_range.clone());
         let z: f32 = rng.gen_range(plane_range.clone());
 
