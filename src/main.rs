@@ -16,7 +16,7 @@ use control::{speed_control_events, steer_control_events};
 use events::{SpeedControlEvent, SteerControlEvent};
 use input::keyboard_input;
 
-use obstacle::spawn_hay_bales;
+use obstacle::{spawn_hay_bales, spawn_cows};
 use rand::prelude::*;
 use ui::{change_text_system, infotext_system, update_debug_ui_system};
 
@@ -37,6 +37,7 @@ fn main() {
         .add_startup_system(camera::spawn_camera)
         .add_startup_system(infotext_system)
         .add_startup_system(spawn_hay_bales)
+        .add_startup_system(spawn_cows)
         .add_system(camera::pan_orbit_camera)
         //.add_system(update_camera)
         //.add_system(move_camera)
