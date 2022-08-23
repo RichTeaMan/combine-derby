@@ -1,9 +1,14 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
+use crate::{events::SoundSampleEvent, combine::Combine};
+
 const HAY_BALE_COUNT: i32 = 1;
 
 const COW_COUNT: i32 = 1;
+
+#[derive(Component)]
+pub struct Cow;
 
 pub fn spawn_hay_bales(mut commands: Commands, asset_server: Res<AssetServer>) {
     let mut _rng = rand::thread_rng();
@@ -46,6 +51,9 @@ pub fn spawn_cows(mut commands: Commands, asset_server: Res<AssetServer>) {
             .insert(Collider::ball(4.0))
             .insert(Restitution::coefficient(0.7))
             .insert(ColliderMassProperties::Density(5.0))
+            //    .insert(ActiveEvents::COLLISION_EVENTS)
+            .insert(ActiveEvents::CONTACT_FORCE_EVENTS)
+            .insert(Cow)
             .with_children(|parent| {
                 parent.spawn_bundle(SceneBundle {
                     scene: bale_gltf.clone(),
@@ -55,5 +63,32 @@ pub fn spawn_cows(mut commands: Commands, asset_server: Res<AssetServer>) {
                     ..Default::default()
                 });
             });
+    }
+}
+
+pub fn collision_check_system(
+    mut contact_force_events: EventReader<ContactForceEvent>,
+    mut sound_samples_events: EventWriter<SoundSampleEvent>,
+    cow_query: Query<&Cow>,
+    combine_query: Query<&Combine>,
+) {
+
+    for contact_force_event in contact_force_events.iter() {
+
+        let mut hits = 0;
+        if let Ok(_) = cow_query.get(contact_force_event.collider1) {
+            hits = hits + 1;
+        } else if let Ok(_) = cow_query.get(contact_force_event.collider2) {
+            hits = hits + 1;
+        }
+
+        if let Ok(_) = combine_query.get(contact_force_event.collider1) {
+            hits = hits + 1;
+        } else if let Ok(_) = combine_query.get(contact_force_event.collider2) {
+            hits = hits + 1;
+        }
+        if hits == 2 {
+            sound_samples_events.send(SoundSampleEvent::Cow);
+        }
     }
 }

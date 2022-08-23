@@ -10,3 +10,7 @@ pub enum SteerControlEvent {
     NoSteer,
     Right,
 }
+
+pub enum SoundSampleEvent {
+    Cow
+}
