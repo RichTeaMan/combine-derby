@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use bevy_rapier3d::{prelude::*, rapier::prelude::JointAxis};
 
 use crate::{
-    combine::{DrivingWheel, SteeringWheel},
+    combine::{DrivingWheel, SteeringWheel, SteeringWheelPosition},
     events::{SpeedControlAction, SpeedControlEvent, SteerControlAction, SteerControlEvent},
 };
 
@@ -60,11 +60,19 @@ pub fn steer_control_events(
 
     for mut q in query.iter_mut() {
         if let Some(action) = control_map.get(&q.0.combine_id) {
+            let mut adjusted_angle = angle;
+            if q.0.steering_wheel_position == SteeringWheelPosition::Left {
+                adjusted_angle =
+                    calc_left_angle(q.0.combine_wheel_base, q.0.combine_track_width, angle);
+            } else if q.0.steering_wheel_position == SteeringWheelPosition::Right {
+                adjusted_angle =
+                    calc_right_angle(q.0.combine_wheel_base, q.0.combine_track_width, angle);
+            }
             match action {
                 SteerControlAction::Left => {
                     q.1.data
-                        .set_motor_position(JointAxis::AngX, -angle, 1.0, 0.5)
-                        .set_limits(JointAxis::AngX, [-angle, straight]);
+                        .set_motor_position(JointAxis::AngX, -adjusted_angle, 1.0, 0.5)
+                        .set_limits(JointAxis::AngX, [-adjusted_angle, straight]);
                 }
                 SteerControlAction::NoSteer => {
                     q.1.data
@@ -73,10 +81,67 @@ pub fn steer_control_events(
                 }
                 SteerControlAction::Right => {
                     q.1.data
-                        .set_motor_position(JointAxis::AngX, angle, 1.0, 0.5)
-                        .set_limits(JointAxis::AngX, [straight, angle]);
+                        .set_motor_position(JointAxis::AngX, adjusted_angle, 1.0, 0.5)
+                        .set_limits(JointAxis::AngX, [straight, adjusted_angle]);
                 }
             }
         }
+    }
+}
+
+/**
+ * Gets the right wheel angle given the relevant steering angle.
+ *
+ * Angles are in radians.
+ */
+fn calc_right_angle(wheel_base: f32, track_width: f32, steering_angle: f32) -> f32 {
+    let tan_steering = steering_angle.tan();
+    ((tan_steering * wheel_base) / (wheel_base + (0.5 * track_width * tan_steering))).atan()
+}
+
+/**
+ * Gets the left wheel angle given the relevant steering angle.
+ *
+ * Angles are in radians.
+ */
+fn calc_left_angle(wheel_base: f32, track_width: f32, steering_angle: f32) -> f32 {
+    let tan_steering = steering_angle.tan();
+    ((tan_steering * wheel_base) / (wheel_base - (0.5 * track_width * tan_steering))).atan()
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::control::{calc_left_angle, calc_right_angle};
+
+    #[test]
+    fn left_angle_test() {
+        let angle: f32 = 35.0;
+        let wheel_angle = calc_left_angle(12.0, 12.0, angle.to_radians()).to_degrees();
+
+        assert_eq!(47.13413, wheel_angle);
+    }
+
+    #[test]
+    fn right_angle_test() {
+        let angle: f32 = 35.0;
+        let wheel_angle = calc_right_angle(12.0, 12.0, angle.to_radians()).to_degrees();
+
+        assert_eq!(27.412718, wheel_angle);
+    }
+
+    #[test]
+    fn left_angle_neg_test() {
+        let angle: f32 = -35.0;
+        let wheel_angle = calc_left_angle(12.0, 12.0, angle.to_radians()).to_degrees();
+
+        assert_eq!(-27.412718, wheel_angle);
+    }
+
+    #[test]
+    fn right_angle_neg_test() {
+        let angle: f32 = -35.0;
+        let wheel_angle = calc_right_angle(12.0, 12.0, angle.to_radians()).to_degrees();
+
+        assert_eq!(-47.13413, wheel_angle);
     }
 }

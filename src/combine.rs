@@ -12,6 +12,8 @@ pub struct Combine {
 pub struct SteeringWheel {
     pub steering_wheel_position: SteeringWheelPosition,
     pub combine_id: i32,
+    pub combine_wheel_base: f32,
+    pub combine_track_width: f32,
 }
 
 #[derive(Component)]
@@ -50,35 +52,44 @@ fn create_combine<'w, 's>(
     spawn_transform: Transform,
     active_camera: bool,
 ) -> Commands<'w, 's> {
-    let physics = RigidBody::Dynamic;
-
-    let body_gltf: Handle<Scene> = asset_server.load("basic-combine-body.glb#Scene0");
-    let wheel_gltf: Handle<Scene> = asset_server.load("basic-wheel.glb#Scene0");
+    let body_linear_damping = 0.0;
+    let body_angular_damping = 0.0;
+    let body_restitution = 0.7;
+    let body_friction = 0.7;
+    let body_density = 20.0;
 
     let wheel_restitution = 0.3;
     let wheel_friction = 1.0;
     let wheel_density = 9.0;
 
+    let max_wheel_force = 50000.0;
+    let max_steer_force = f32::MAX;
+    let wheel_factor = 0.0;
+
+    let steering_motor_stiffness = 0.5;
+    let steering_motor_damping = 0.5;
+
+    let physics = RigidBody::Dynamic;
+
+    let body_gltf: Handle<Scene> = asset_server.load("basic-combine-body.glb#Scene0");
+    let wheel_gltf: Handle<Scene> = asset_server.load("basic-wheel.glb#Scene0");
+
     let body_entity = commands
         .spawn()
         .insert_bundle(SpatialBundle::from(spawn_transform))
-        .insert(Restitution::coefficient(0.7))
+        .insert(Restitution::coefficient(body_restitution))
         .insert(ExternalForce {
             force: Vec3::new(0.0, 0.0, 0.0),
             torque: Vec3::new(0.0, 0.0, 0.0),
         })
-        .insert(ExternalImpulse {
-            impulse: Vec3::new(0.0, 0.0, 0.0),
-            torque_impulse: Vec3::new(0.0, 0.0, 0.0),
-        })
-        .insert(Friction::coefficient(0.7))
+        .insert(Friction::coefficient(body_friction))
         .insert(Combine { combine_id })
         .insert(physics)
         .insert(Collider::cuboid(4.6, 4.0, 9.0))
-        .insert(ColliderMassProperties::Density(20.0))
+        .insert(ColliderMassProperties::Density(body_density))
         .insert(Damping {
-            linear_damping: 0.2,
-            angular_damping: 4.0,
+            linear_damping: body_linear_damping,
+            angular_damping: body_angular_damping,
         })
         .with_children(|parent| {
             parent.spawn_bundle(SceneBundle {
@@ -229,45 +240,44 @@ fn create_combine<'w, 's>(
     let x = Vec3::X;
 
     let velocity = 0.0;
-    let max_force = 50000.0; // f32::MAX / 2.0;
-    let max_steer_force = f32::MAX;
-
-    let factor = 0.0;
 
     let revs = [
         RevoluteJointBuilder::new(x)
             .local_anchor1(Vec3::new(x_shift_1, -y_shift_1, -z_shift_1))
             .local_anchor2(Vec3::new(x_shift_2, y_shift_2, z_shift_2))
-            .motor_velocity(velocity, factor)
-            .motor_max_force(max_force),
+            .motor_velocity(velocity, wheel_factor)
+            .motor_max_force(max_wheel_force),
         RevoluteJointBuilder::new(x)
             .local_anchor1(Vec3::new(-x_shift_1, -y_shift_1, -z_shift_1))
             .local_anchor2(Vec3::new(x_shift_2, y_shift_2, z_shift_2))
-            .motor_velocity(velocity, factor)
-            .motor_max_force(max_force),
+            .motor_velocity(velocity, wheel_factor)
+            .motor_max_force(max_wheel_force),
         RevoluteJointBuilder::new(x)
             .local_anchor1(Vec3::new(1.0, 0.0, 0.0))
             .local_anchor2(Vec3::new(x_shift_2, y_shift_2, z_shift_2))
-            .motor_velocity(velocity, factor)
-            .motor_max_force(max_force),
+            .motor_velocity(velocity, wheel_factor)
+            .motor_max_force(max_wheel_force),
         RevoluteJointBuilder::new(x)
             .local_anchor1(Vec3::new(-1.0, 0.0, 0.0))
             .local_anchor2(Vec3::new(x_shift_2, y_shift_2, z_shift_2))
-            .motor_velocity(velocity, factor)
-            .motor_max_force(max_force),
+            .motor_velocity(velocity, wheel_factor)
+            .motor_max_force(max_wheel_force),
     ];
 
     let steering_left_joint = RevoluteJointBuilder::new(Vec3::Y)
         .local_anchor1(Vec3::new(x_shift_1, -y_shift_1, z_shift_rear))
         .local_anchor2(Vec3::new(x_shift_2, y_shift_2, z_shift_2))
-        .motor_position(0.0, 0.5, 0.5)
+        .motor_position(0.0, steering_motor_stiffness, steering_motor_damping)
         .motor_max_force(max_steer_force);
 
     let steering_right_joint = RevoluteJointBuilder::new(Vec3::Y)
         .local_anchor1(Vec3::new(-x_shift_1, -y_shift_1, z_shift_rear))
         .local_anchor2(Vec3::new(x_shift_2, y_shift_2, z_shift_2))
-        .motor_position(0.0, 0.5, 0.5)
+        .motor_position(0.0, steering_motor_stiffness, steering_motor_damping)
         .motor_max_force(max_steer_force);
+
+    let wheel_base = z_shift_1 + z_shift_rear;
+    let track_width = x_shift_1 * 2.0;
 
     commands
         .entity(steering_rack_left)
@@ -276,6 +286,8 @@ fn create_combine<'w, 's>(
         .insert(SteeringWheel {
             steering_wheel_position: SteeringWheelPosition::Left,
             combine_id,
+            combine_wheel_base: wheel_base,
+            combine_track_width: track_width,
         });
 
     commands
@@ -285,6 +297,8 @@ fn create_combine<'w, 's>(
         .insert(SteeringWheel {
             steering_wheel_position: SteeringWheelPosition::Right,
             combine_id,
+            combine_wheel_base: wheel_base,
+            combine_track_width: track_width,
         });
 
     commands
