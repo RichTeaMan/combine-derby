@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::{
     camera::SwitchCameraEvent,
-    events::{SpeedControlAction, SpeedControlEvent, SteerControlAction, SteerControlEvent},
+    events::{SpeedControlAction, SpeedControlEvent, SteerControlAction, SteerControlEvent}, combine::PLAYER_COMBINE_ID,
 };
 
 pub fn keyboard_input(
@@ -11,7 +11,7 @@ pub fn keyboard_input(
     mut steer_control_events: ResMut<Events<SteerControlEvent>>,
     mut camera_events: ResMut<Events<SwitchCameraEvent>>,
 ) {
-    let combine_id = 7;
+    let combine_id = PLAYER_COMBINE_ID;
 
     if keys.pressed(KeyCode::W) {
         speed_control_events.send(SpeedControlEvent {

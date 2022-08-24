@@ -13,7 +13,7 @@ use arena::setup_arena;
 use bevy::{diagnostic::FrameTimeDiagnosticsPlugin, prelude::*};
 use bevy_rapier3d::prelude::*;
 use camera::{camera_events, SwitchCameraEvent};
-use combine::spawn_combines;
+use combine::{spawn_combines, combine_speedometer_system, transmission_system};
 
 use control::{speed_control_events, steer_control_events};
 use events::{SpeedControlEvent, SteerControlEvent, SoundSampleEvent};
@@ -21,7 +21,7 @@ use input::keyboard_input;
 
 use obstacle::{spawn_hay_bales, spawn_cows, collision_check_system};
 use sounds::{play_sample, setup_sounds};
-use ui::{change_text_system, infotext_system, update_debug_ui_system};
+use ui::{change_text_system, infotext_system, update_debug_ui_system, combine_ui_system};
 
 fn main() {
     App::new()
@@ -51,5 +51,8 @@ fn main() {
         .add_system(change_text_system)
         .add_system(collision_check_system)
         .add_system(play_sample)
+        .add_system(combine_ui_system)
+        .add_system(combine_speedometer_system)
+        .add_system(transmission_system)
         .run();
 }

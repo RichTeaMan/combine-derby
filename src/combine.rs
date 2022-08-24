@@ -1,11 +1,34 @@
+use std::{
+    collections::{HashMap, VecDeque},
+    time::Duration,
+};
+
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
 use crate::camera::CombineCamera;
 
+pub const PLAYER_COMBINE_ID: i32 = 1;
+
+const VELOCITY_QUEUE_LIMIT: usize = 16;
+
 #[derive(Component, Default)]
 pub struct Combine {
     pub combine_id: i32,
+
+    pub velocity_queue: VecDeque<(Vec3, Duration)>,
+
+    pub velocity: f32,
+}
+
+impl Combine {
+    pub fn new(combine_id: i32) -> Combine {
+        Combine {
+            combine_id,
+            velocity_queue: VecDeque::new(),
+            velocity: 0.0,
+        }
+    }
 }
 
 #[derive(Component)]
@@ -19,6 +42,16 @@ pub struct SteeringWheel {
 #[derive(Component)]
 pub struct DrivingWheel {
     pub combine_id: i32,
+    pub target_velocity: f32,
+}
+
+impl DrivingWheel {
+    pub fn new(combine_id: i32) -> DrivingWheel {
+        DrivingWheel {
+            combine_id,
+            target_velocity: 10.0,
+        }
+    }
 }
 
 #[derive(Eq, PartialEq)]
@@ -31,7 +64,7 @@ pub fn spawn_combines(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands = create_combine(
         commands,
         &asset_server,
-        7,
+        PLAYER_COMBINE_ID,
         Transform::from_xyz(0.0, 10.0, 0.0),
         true,
     );
@@ -39,7 +72,7 @@ pub fn spawn_combines(mut commands: Commands, asset_server: Res<AssetServer>) {
     create_combine(
         commands,
         &asset_server,
-        1,
+        7,
         Transform::from_xyz(80.0, 10.0, 0.0),
         false,
     );
@@ -56,13 +89,13 @@ fn create_combine<'w, 's>(
     let body_angular_damping = 0.0;
     let body_restitution = 0.7;
     let body_friction = 0.7;
-    let body_density = 20.0;
+    let body_density = 10.0;
 
     let wheel_restitution = 0.3;
-    let wheel_friction = 1.0;
-    let wheel_density = 9.0;
+    let wheel_friction = 0.8;
+    let wheel_density = 2.0;
 
-    let max_wheel_force = 50000.0;
+    let max_wheel_force = f32::MAX; //50000.0;
     let max_steer_force = f32::MAX;
     let wheel_factor = 0.0;
 
@@ -83,7 +116,7 @@ fn create_combine<'w, 's>(
             torque: Vec3::new(0.0, 0.0, 0.0),
         })
         .insert(Friction::coefficient(body_friction))
-        .insert(Combine { combine_id })
+        .insert(Combine::new(combine_id))
         .insert(physics)
         .insert(Collider::cuboid(4.6, 4.0, 9.0))
         .insert(ColliderMassProperties::Density(body_density))
@@ -304,22 +337,68 @@ fn create_combine<'w, 's>(
     commands
         .entity(wheel_0_entity)
         .insert(MultibodyJoint::new(body_entity, revs[0]))
-        .insert(DrivingWheel { combine_id });
+        .insert(DrivingWheel::new(combine_id));
 
     commands
         .entity(wheel_1_entity)
         .insert(MultibodyJoint::new(body_entity, revs[1]))
-        .insert(DrivingWheel { combine_id });
+        .insert(DrivingWheel::new(combine_id));
 
     commands
         .entity(wheel_2_entity)
         .insert(MultibodyJoint::new(steering_rack_left, revs[2]))
-        .insert(DrivingWheel { combine_id });
+        .insert(DrivingWheel::new(combine_id));
 
     commands
         .entity(wheel_3_entity)
         .insert(MultibodyJoint::new(steering_rack_right, revs[3]))
-        .insert(DrivingWheel { combine_id });
+        .insert(DrivingWheel::new(combine_id));
 
     commands
+}
+
+pub fn combine_speedometer_system(
+    mut combine_query: Query<(&mut Combine, &Transform)>,
+    time: Res<Time>,
+) {
+    let time_since_startup = time.time_since_startup();
+
+    for (mut combine, transform) in combine_query.iter_mut() {
+        let vec_length = transform.translation;
+        combine
+            .velocity_queue
+            .push_back((vec_length, time_since_startup));
+
+        if combine.velocity_queue.len() == VELOCITY_QUEUE_LIMIT {
+            let (vec_length_comparison, vec_time_comparision) =
+                combine.velocity_queue.pop_front().unwrap();
+
+            let vec = ((vec_length.distance(vec_length_comparison))
+                / ((time_since_startup - vec_time_comparision).as_millis() as f32))
+                * 1000.0;
+            combine.velocity = vec;
+        }
+    }
+}
+
+pub fn transmission_system(
+    combine_query: Query<&Combine>,
+    mut drive_wheel_query: Query<&mut DrivingWheel>,
+) {
+    let mut combine_map: HashMap<i32, f32> = HashMap::new();
+
+    for combine in combine_query.iter() {
+        let mut velocity = 10.0;
+        if combine.velocity > 30.0 {
+            velocity = 40.0;
+        } else if combine.velocity > 15.0 {
+            velocity = 20.0;
+        }
+        combine_map.insert(combine.combine_id, velocity);
+    }
+
+    for mut drive_wheel in drive_wheel_query.iter_mut() {
+        let velocity = combine_map.get(&drive_wheel.combine_id).unwrap();
+        drive_wheel.target_velocity = *velocity;
+    }
 }

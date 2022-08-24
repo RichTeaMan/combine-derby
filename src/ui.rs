@@ -3,13 +3,17 @@ use bevy::{
     prelude::*,
 };
 
-use crate::{camera, config};
+use crate::{
+    camera,
+    combine::{Combine, PLAYER_COMBINE_ID},
+    config,
+};
 
 #[derive(Component)]
 pub struct TextChanges;
 
 #[derive(Component)]
-pub struct NameUi;
+pub struct SpeedoUi;
 
 #[derive(Component)]
 pub struct DescriptionUi;
@@ -54,7 +58,7 @@ pub fn infotext_system(mut commands: Commands, asset_server: Res<AssetServer>) {
                 align_self: AlignSelf::FlexEnd,
                 position_type: PositionType::Absolute,
                 position: UiRect {
-                    top: Val::Px(300.0),
+                    bottom: Val::Px(30.0),
                     left: Val::Px(15.0),
                     ..default()
                 },
@@ -73,7 +77,7 @@ pub fn infotext_system(mut commands: Commands, asset_server: Res<AssetServer>) {
             },
             ..default()
         })
-        .insert(NameUi);
+        .insert(SpeedoUi);
 
     commands
         .spawn_bundle(TextBundle {
@@ -148,6 +152,19 @@ pub fn change_text_system(
             config::BUILD_DATE,
             fps
         );
+    }
+}
+
+pub fn combine_ui_system(
+    combine_query: Query<&Combine>,
+    mut text_query: Query<&mut Text, With<SpeedoUi>>,
+) {
+    let mut text = text_query.single_mut();
+
+    for combine in combine_query.iter() {
+        if combine.combine_id == PLAYER_COMBINE_ID {
+            text.sections[0].value = format!("{:.0} m/s", combine.velocity);
+        }
     }
 }
 
