@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
-use crate::{events::SoundSampleEvent, combine::Combine};
+use crate::{combine::Combine, events::SoundSampleEvent};
 
 const HAY_BALE_COUNT: i32 = 1;
 
@@ -72,9 +72,7 @@ pub fn collision_check_system(
     cow_query: Query<&Cow>,
     combine_query: Query<&Combine>,
 ) {
-
     for contact_force_event in contact_force_events.iter() {
-
         let mut hits = 0;
         if let Ok(_) = cow_query.get(contact_force_event.collider1) {
             hits = hits + 1;

@@ -1,3 +1,4 @@
+mod arena;
 mod camera;
 mod combine;
 mod config;
@@ -5,23 +6,22 @@ mod control;
 mod events;
 mod input;
 mod obstacle;
-mod ui;
 mod sounds;
-mod arena;
+mod ui;
 
 use arena::setup_arena;
 use bevy::{diagnostic::FrameTimeDiagnosticsPlugin, prelude::*};
 use bevy_rapier3d::prelude::*;
 use camera::{camera_events, SwitchCameraEvent};
-use combine::{spawn_combines, combine_speedometer_system, transmission_system};
+use combine::{combine_speedometer_system, spawn_combines, transmission_system};
 
 use control::{speed_control_events, steer_control_events};
-use events::{SpeedControlEvent, SteerControlEvent, SoundSampleEvent};
+use events::{SoundSampleEvent, SpeedControlEvent, SteerControlEvent};
 use input::keyboard_input;
 
-use obstacle::{spawn_hay_bales, spawn_cows, collision_check_system};
+use obstacle::{collision_check_system, spawn_cows, spawn_hay_bales};
 use sounds::{play_sample, setup_sounds};
-use ui::{change_text_system, infotext_system, update_debug_ui_system, combine_ui_system};
+use ui::{change_text_system, combine_ui_system, infotext_system, update_debug_ui_system};
 
 fn main() {
     App::new()

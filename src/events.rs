@@ -1,6 +1,6 @@
 pub struct SpeedControlEvent {
     pub combine_id: i32,
-    pub action: SpeedControlAction
+    pub action: SpeedControlAction,
 }
 
 #[derive(Clone)]
@@ -8,12 +8,12 @@ pub enum SpeedControlAction {
     Forward,
     Back,
     NoPower,
-    Brake
+    Brake,
 }
 
 pub struct SteerControlEvent {
     pub combine_id: i32,
-    pub action: SteerControlAction
+    pub action: SteerControlAction,
 }
 
 #[derive(Clone)]
@@ -24,5 +24,5 @@ pub enum SteerControlAction {
 }
 
 pub enum SoundSampleEvent {
-    Cow
+    Cow,
 }

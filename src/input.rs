@@ -2,7 +2,8 @@ use bevy::prelude::*;
 
 use crate::{
     camera::SwitchCameraEvent,
-    events::{SpeedControlAction, SpeedControlEvent, SteerControlAction, SteerControlEvent}, combine::PLAYER_COMBINE_ID,
+    combine::PLAYER_COMBINE_ID,
+    events::{SpeedControlAction, SpeedControlEvent, SteerControlAction, SteerControlEvent},
 };
 
 pub fn keyboard_input(

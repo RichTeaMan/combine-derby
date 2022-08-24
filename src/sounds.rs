@@ -14,7 +14,10 @@ pub struct SoundSamples {
 pub fn setup_sounds(mut commands: Commands, asset_server: Res<AssetServer>) {
     let moo: Handle<AudioSource> = asset_server.load("sounds/moo.ogg");
 
-    commands.spawn().insert(SoundSamples { moo, last_moo_time: Duration::ZERO });
+    commands.spawn().insert(SoundSamples {
+        moo,
+        last_moo_time: Duration::ZERO,
+    });
 }
 
 pub fn play_sample(
