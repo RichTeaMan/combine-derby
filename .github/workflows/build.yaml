@@ -1,0 +1,84 @@
+on: [push]
+
+name: Build
+
+jobs:
+  build_and_test_linux:
+    name: combine_derby_linux
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - name: Install dev dependencies
+        run: sudo apt-get install -y libasound2-dev portaudio19-dev build-essential libpulse-dev libdbus-1-dev g++ pkg-config libx11-dev libasound2-dev libudev-dev
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --all-features
+      - name: Copy assets for archive
+        run: cp assets/ target/release/ -r
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: comine_derby_linux_dist
+          path: |
+            target/release/combine-derby
+            target/release/assets/
+  build_and_test_windows:
+    name: combine_derby_windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --all-features
+      - name: Copy assets for archive
+        run: xcopy assets\ target\release\assets\ /s /i
+      - run: dir target\release
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: combine_derby_windows_dist
+          path: |
+            target/release/combine-derby.exe
+            target/release/assets/
+  build_and_test_wasm:
+    name: combine_derby_wasm
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - name: Install dev dependencies
+        run: sudo apt-get install -y libasound2-dev portaudio19-dev build-essential libpulse-dev libdbus-1-dev g++ pkg-config libx11-dev libasound2-dev libudev-dev
+      - name: Install cargo dependencies
+        run: rustup target install wasm32-unknown-unknown && cargo install wasm-bindgen-cli
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --all-features --target wasm32-unknown-unknown
+      - name: Wasm binding
+        run: wasm-bindgen --out-dir ./docs/ --target web target/wasm32-unknown-unknown/release/combine-derby.wasm
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: combine_derby_wasm_dist
+          path: |
+            docs/
+

@@ -1,0 +1,44 @@
+on:
+  push:
+    branches:
+      - 'main'
+
+
+name: Deploy WASM
+
+jobs:
+  build_and_deploy_wasm:
+    name: combine_derby_wasm
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - name: Install dev dependencies
+        run: sudo apt-get install -y libasound2-dev portaudio19-dev build-essential libpulse-dev libdbus-1-dev g++ pkg-config libx11-dev libasound2-dev libudev-dev
+      - name: Install cargo dependencies
+        run: rustup target install wasm32-unknown-unknown && cargo install wasm-bindgen-cli
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --all-features --target wasm32-unknown-unknown
+      - name: Wasm binding
+        run: wasm-bindgen --out-dir ./docs/ --target web target/wasm32-unknown-unknown/release/combine-derby.wasm
+      - name: Copy assets
+        run: cp assets/ docs/. -r
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: combine_derby_wasm
+          path: |
+            docs/
+      - name: Create commit
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: '--force docs'
+          message: 'Updated wasm-build'
+          push: false
+      - name: Update wasm-build branch
+        run: git checkout -b wasm-build && git push origin wasm-build --force
+
