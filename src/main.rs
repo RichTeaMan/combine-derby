@@ -26,6 +26,7 @@ const PLANE_SIZE: f32 = 500.0;
 
 fn main() {
     App::new()
+        .insert_resource(ClearColor(Color::rgb(0.53, 0.80, 0.92)))
         .add_plugins(DefaultPlugins)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugin(RapierDebugRenderPlugin::default())
