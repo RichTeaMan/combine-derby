@@ -5,19 +5,19 @@ use crate::camera::CombineCamera;
 
 #[derive(Component, Default)]
 pub struct Combine {
-    pub player_controlled: bool,
-    pub engine_force: f32,
-    pub reverse_engine_force: f32,
-    pub steering_force: f32,
+    pub combine_id: i32,
 }
 
 #[derive(Component)]
 pub struct SteeringWheel {
     pub steering_wheel_position: SteeringWheelPosition,
+    pub combine_id: i32,
 }
 
 #[derive(Component)]
-pub struct DrivingWheel;
+pub struct DrivingWheel {
+    pub combine_id: i32,
+}
 
 #[derive(Eq, PartialEq)]
 pub enum SteeringWheelPosition {
@@ -25,12 +25,17 @@ pub enum SteeringWheelPosition {
     Right,
 }
 
-
 pub fn spawn_combine(mut commands: Commands, asset_server: Res<AssetServer>) {
     let physics = RigidBody::Dynamic;
 
     let body_gltf: Handle<Scene> = asset_server.load("basic-combine-body.glb#Scene0");
     let wheel_gltf: Handle<Scene> = asset_server.load("basic-wheel.glb#Scene0");
+
+    let wheel_restitution = 0.3;
+    let wheel_friction = 1.0;
+    let wheel_density = 9.0;
+
+    let combine_id = 7;
 
     let body_entity = commands
         .spawn()
@@ -45,12 +50,7 @@ pub fn spawn_combine(mut commands: Commands, asset_server: Res<AssetServer>) {
             torque_impulse: Vec3::new(0.0, 0.0, 0.0),
         })
         .insert(Friction::coefficient(0.7))
-        .insert(Combine {
-            engine_force: 3200000.0,
-            reverse_engine_force: 280000.0,
-            player_controlled: true,
-            steering_force: 12000000.0,
-        })
+        .insert(Combine { combine_id })
         .insert(physics)
         .insert(Collider::cuboid(4.6, 4.0, 9.0))
         .insert(ColliderMassProperties::Density(20.0))
@@ -76,10 +76,6 @@ pub fn spawn_combine(mut commands: Commands, asset_server: Res<AssetServer>) {
                 .insert(CombineCamera);
         })
         .id();
-
-    let wheel_restitution = 0.3;
-    let wheel_friction = 1.0;
-    let wheel_density = 9.0;
 
     let wheel_0_entity = commands
         .spawn()
@@ -253,6 +249,7 @@ pub fn spawn_combine(mut commands: Commands, asset_server: Res<AssetServer>) {
         .insert(MultibodyJoint::new(body_entity, steering_left_joint))
         .insert(SteeringWheel {
             steering_wheel_position: SteeringWheelPosition::Left,
+            combine_id,
         });
 
     commands
@@ -261,25 +258,26 @@ pub fn spawn_combine(mut commands: Commands, asset_server: Res<AssetServer>) {
         .insert(MultibodyJoint::new(body_entity, steering_right_joint))
         .insert(SteeringWheel {
             steering_wheel_position: SteeringWheelPosition::Right,
+            combine_id,
         });
 
     commands
         .entity(wheel_0_entity)
         .insert(MultibodyJoint::new(body_entity, revs[0]))
-        .insert(DrivingWheel);
+        .insert(DrivingWheel { combine_id });
 
     commands
         .entity(wheel_1_entity)
         .insert(MultibodyJoint::new(body_entity, revs[1]))
-        .insert(DrivingWheel);
+        .insert(DrivingWheel { combine_id });
 
     commands
         .entity(wheel_2_entity)
         .insert(MultibodyJoint::new(steering_rack_left, revs[2]))
-        .insert(DrivingWheel);
+        .insert(DrivingWheel { combine_id });
 
     commands
         .entity(wheel_3_entity)
         .insert(MultibodyJoint::new(steering_rack_right, revs[3]))
-        .insert(DrivingWheel);
+        .insert(DrivingWheel { combine_id });
 }

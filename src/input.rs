@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::{
     camera::SwitchCameraEvent,
-    events::{SpeedControlEvent, SteerControlEvent},
+    events::{SpeedControlAction, SpeedControlEvent, SteerControlAction, SteerControlEvent},
 };
 
 pub fn keyboard_input(
@@ -11,20 +11,40 @@ pub fn keyboard_input(
     mut steer_control_events: ResMut<Events<SteerControlEvent>>,
     mut camera_events: ResMut<Events<SwitchCameraEvent>>,
 ) {
+    let combine_id = 7;
+
     if keys.pressed(KeyCode::W) {
-        speed_control_events.send(SpeedControlEvent::Forward);
+        speed_control_events.send(SpeedControlEvent {
+            combine_id,
+            action: SpeedControlAction::Forward,
+        });
     } else if keys.pressed(KeyCode::S) {
-        speed_control_events.send(SpeedControlEvent::Back);
+        speed_control_events.send(SpeedControlEvent {
+            combine_id,
+            action: SpeedControlAction::Back,
+        });
     } else {
-        speed_control_events.send(SpeedControlEvent::NoPower);
+        speed_control_events.send(SpeedControlEvent {
+            combine_id,
+            action: SpeedControlAction::NoPower,
+        });
     }
 
     if keys.pressed(KeyCode::A) {
-        steer_control_events.send(SteerControlEvent::Left);
+        steer_control_events.send(SteerControlEvent {
+            combine_id,
+            action: SteerControlAction::Left,
+        });
     } else if keys.pressed(KeyCode::D) {
-        steer_control_events.send(SteerControlEvent::Right);
+        steer_control_events.send(SteerControlEvent {
+            combine_id,
+            action: SteerControlAction::Right,
+        });
     } else {
-        steer_control_events.send(SteerControlEvent::NoSteer);
+        steer_control_events.send(SteerControlEvent {
+            combine_id,
+            action: SteerControlAction::NoSteer,
+        });
     }
 
     if keys.just_pressed(KeyCode::F4) {
@@ -32,7 +52,10 @@ pub fn keyboard_input(
     }
 
     if keys.pressed(KeyCode::Space) {
-        speed_control_events.send(SpeedControlEvent::Brake);
+        speed_control_events.send(SpeedControlEvent {
+            combine_id,
+            action: SpeedControlAction::Brake,
+        });
     }
     if keys.just_released(KeyCode::LControl) {
         // Left Ctrl was released
