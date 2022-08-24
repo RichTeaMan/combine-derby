@@ -13,7 +13,7 @@ use arena::setup_arena;
 use bevy::{diagnostic::FrameTimeDiagnosticsPlugin, prelude::*};
 use bevy_rapier3d::prelude::*;
 use camera::{camera_events, SwitchCameraEvent};
-use combine::spawn_combine;
+use combine::spawn_combines;
 
 use control::{speed_control_events, steer_control_events};
 use events::{SpeedControlEvent, SteerControlEvent, SoundSampleEvent};
@@ -36,7 +36,7 @@ fn main() {
         .add_event::<SoundSampleEvent>()
         .add_startup_system(setup_arena)
         .add_startup_system(setup_sounds)
-        .add_startup_system(spawn_combine)
+        .add_startup_system(spawn_combines)
         .add_startup_system(camera::spawn_camera)
         .add_startup_system(infotext_system)
         .add_startup_system(spawn_hay_bales)

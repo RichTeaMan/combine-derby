@@ -25,7 +25,31 @@ pub enum SteeringWheelPosition {
     Right,
 }
 
-pub fn spawn_combine(mut commands: Commands, asset_server: Res<AssetServer>) {
+pub fn spawn_combines(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands = create_combine(
+        commands,
+        &asset_server,
+        7,
+        Transform::from_xyz(0.0, 10.0, 0.0),
+        true,
+    );
+
+    create_combine(
+        commands,
+        &asset_server,
+        1,
+        Transform::from_xyz(80.0, 10.0, 0.0),
+        false,
+    );
+}
+
+fn create_combine<'w, 's>(
+    mut commands: Commands<'w, 's>,
+    asset_server: &Res<AssetServer>,
+    combine_id: i32,
+    spawn_transform: Transform,
+    active_camera: bool,
+) -> Commands<'w, 's> {
     let physics = RigidBody::Dynamic;
 
     let body_gltf: Handle<Scene> = asset_server.load("basic-combine-body.glb#Scene0");
@@ -35,11 +59,9 @@ pub fn spawn_combine(mut commands: Commands, asset_server: Res<AssetServer>) {
     let wheel_friction = 1.0;
     let wheel_density = 9.0;
 
-    let combine_id = 7;
-
     let body_entity = commands
         .spawn()
-        .insert_bundle(SpatialBundle::from(Transform::from_xyz(0.0, 20.0, 0.0)))
+        .insert_bundle(SpatialBundle::from(spawn_transform))
         .insert(Restitution::coefficient(0.7))
         .insert(ExternalForce {
             force: Vec3::new(0.0, 0.0, 0.0),
@@ -71,9 +93,13 @@ pub fn spawn_combine(mut commands: Commands, asset_server: Res<AssetServer>) {
                 .spawn_bundle(Camera3dBundle {
                     transform: Transform::from_xyz(0.0, 20.0, 40.0)
                         .with_rotation(Quat::from_rotation_x(-0.4)),
+                    camera: Camera {
+                        is_active: active_camera,
+                        ..Default::default()
+                    },
                     ..Default::default()
                 })
-                .insert(CombineCamera);
+                .insert(CombineCamera { combine_id });
         })
         .id();
 
@@ -280,4 +306,6 @@ pub fn spawn_combine(mut commands: Commands, asset_server: Res<AssetServer>) {
         .entity(wheel_3_entity)
         .insert(MultibodyJoint::new(steering_rack_right, revs[3]))
         .insert(DrivingWheel { combine_id });
+
+    commands
 }

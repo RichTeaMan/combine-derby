@@ -10,7 +10,9 @@ use bevy::{
 pub struct FreeCamera;
 
 #[derive(Component)]
-pub struct CombineCamera;
+pub struct CombineCamera {
+    pub combine_id: i32,
+}
 
 /// Tags an entity as capable of panning and orbiting.
 #[derive(Component)]
@@ -163,9 +165,30 @@ pub fn camera_events(
 ) {
     for _ in events.iter() {
         let mut free_camera = free_camera_query.single_mut().1;
-        let mut combine_camera = combine_camera_query.single_mut().1;
+        if free_camera.is_active {
+            if let Some(mut combine_camera) = combine_camera_query.iter_mut().next() {
+                combine_camera.1.is_active = true;
+                free_camera.is_active = false;
+            }
+        } else {
+            let mut found_active = false;
+            let mut camera_count = 0;
+            for mut combine_camera in combine_camera_query.iter_mut() {
+                if found_active {
+                    found_active = false;
+                    combine_camera.1.is_active = true;
+                    break;
+                }
+                if combine_camera.1.is_active {
+                    found_active = true;
+                }
+                combine_camera.1.is_active = false;
+                camera_count = camera_count + 1;
+            }
 
-        free_camera.is_active = !free_camera.is_active;
-        combine_camera.is_active = !combine_camera.is_active;
+            if camera_count == 0 || found_active {
+                free_camera.is_active = true;
+            }
+        }
     }
 }
