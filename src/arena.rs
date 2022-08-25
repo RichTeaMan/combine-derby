@@ -11,7 +11,7 @@ pub fn setup_arena(
 ) {
     const TILE_SIZE: f32 = 20.0;
     const FENCE_HEIGHT: f32 = 20.0;
-    let ground_plane_handle = meshes.add(Mesh::from(shape::Plane { size: FENCE_HEIGHT }));
+    let ground_plane_handle = meshes.add(Mesh::from(shape::Plane { size: TILE_SIZE }));
     let fence_handle = meshes.add(Mesh::from(shape::Quad {
         size: Vec2 {
             x: TILE_SIZE,
@@ -151,16 +151,27 @@ pub fn setup_arena(
 
     // setup ramps
 
-    let ramp_height = 30.0;
+    let ramp_height: f32 = 30.0;
     let half_ramp_height = ramp_height / 2.0;
     let ramp_length = PLANE_SIZE / 2.0;
+    let slope_rotation = (ramp_height / ramp_length).atan();
+
+    let ramp_plane_handle = meshes.add(Mesh::from(shape::Plane {
+        size: PLANE_SIZE / 2.0,
+    }));
+    let ramp_material_handle = materials.add(StandardMaterial {
+        base_color: Color::rgb(0.66, 0.66, 0.68),
+        perceptual_roughness: 0.1,
+        unlit: true,
+        ..default()
+    });
 
     // ramp 1
 
     // plinth
     commands
         .spawn()
-        .insert_bundle(TransformBundle::from(Transform::from_xyz(
+        .insert_bundle(SpatialBundle::from(Transform::from_xyz(
             PLANE_SIZE - (PLANE_SIZE / 4.0),
             ground_y_position + half_ramp_height,
             PLANE_SIZE - (PLANE_SIZE / 4.0),
@@ -169,7 +180,15 @@ pub fn setup_arena(
             PLANE_SIZE / 4.0,
             half_ramp_height,
             PLANE_SIZE / 4.0,
-        ));
+        ))
+        .with_children(|parent| {
+            parent.spawn_bundle(PbrBundle {
+                mesh: ramp_plane_handle.clone(),
+                material: ramp_material_handle.clone(),
+                transform: Transform::from_translation(Vec3::new(0.0, half_ramp_height, 0.0)),
+                ..default()
+            });
+        });
 
     // slope
     commands
@@ -190,7 +209,7 @@ pub fn setup_arena(
 
     commands
         .spawn()
-        .insert_bundle(TransformBundle::from(
+        .insert_bundle(SpatialBundle::from(
             Transform::from_xyz(
                 PLANE_SIZE - (PLANE_SIZE / 2.0),
                 ground_y_position,
@@ -202,7 +221,20 @@ pub fn setup_arena(
             Vec3::new(0.0, ramp_height, 0.0),
             Vec3::new(-PLANE_SIZE / 2.0, ramp_height, 0.0),
             Vec3::new(0.0, 0.0, ramp_length),
-        ));
+        ))
+        .with_children(|parent| {
+            parent.spawn_bundle(PbrBundle {
+                mesh: ramp_plane_handle.clone(),
+                material: ramp_material_handle.clone(),
+                transform: Transform::from_translation(Vec3::new(
+                    -0.25 * PLANE_SIZE,
+                    half_ramp_height,
+                    0.25 * PLANE_SIZE,
+                ))
+                .with_rotation(Quat::from_rotation_x(slope_rotation)),
+                ..default()
+            });
+        });
     commands
         .spawn()
         .insert_bundle(TransformBundle::from(
@@ -235,10 +267,9 @@ pub fn setup_arena(
             Vec3::new(0.0, 0.0, 0.0),
             Vec3::new(0.0, 0.0, ramp_length),
         ));
-
     commands
         .spawn()
-        .insert_bundle(TransformBundle::from(
+        .insert_bundle(SpatialBundle::from(
             Transform::from_xyz(
                 PLANE_SIZE - (PLANE_SIZE / 2.0),
                 ground_y_position,
@@ -250,7 +281,20 @@ pub fn setup_arena(
             Vec3::new(0.0, ramp_height, 0.0),
             Vec3::new(-PLANE_SIZE / 2.0, ramp_height, 0.0),
             Vec3::new(0.0, 0.0, ramp_length),
-        ));
+        ))
+        .with_children(|parent| {
+            parent.spawn_bundle(PbrBundle {
+                mesh: ramp_plane_handle.clone(),
+                material: ramp_material_handle.clone(),
+                transform: Transform::from_translation(Vec3::new(
+                    -0.25 * PLANE_SIZE,
+                    half_ramp_height,
+                    0.25 * PLANE_SIZE,
+                ))
+                .with_rotation(Quat::from_rotation_x(slope_rotation)),
+                ..default()
+            });
+        });
     commands
         .spawn()
         .insert_bundle(TransformBundle::from(
@@ -272,7 +316,7 @@ pub fn setup_arena(
     // plinth
     commands
         .spawn()
-        .insert_bundle(TransformBundle::from(Transform::from_xyz(
+        .insert_bundle(SpatialBundle::from(Transform::from_xyz(
             -(PLANE_SIZE - (PLANE_SIZE / 4.0)),
             ground_y_position + half_ramp_height,
             -(PLANE_SIZE - (PLANE_SIZE / 4.0)),
@@ -281,7 +325,15 @@ pub fn setup_arena(
             PLANE_SIZE / 4.0,
             half_ramp_height,
             PLANE_SIZE / 4.0,
-        ));
+        ))
+        .with_children(|parent| {
+            parent.spawn_bundle(PbrBundle {
+                mesh: ramp_plane_handle.clone(),
+                material: ramp_material_handle.clone(),
+                transform: Transform::from_translation(Vec3::new(0.0, half_ramp_height, 0.0)),
+                ..default()
+            });
+        });
 
     // slope
     commands
@@ -302,7 +354,7 @@ pub fn setup_arena(
 
     commands
         .spawn()
-        .insert_bundle(TransformBundle::from(
+        .insert_bundle(SpatialBundle::from(
             Transform::from_xyz(
                 -(PLANE_SIZE - (PLANE_SIZE / 2.0)),
                 ground_y_position,
@@ -314,7 +366,20 @@ pub fn setup_arena(
             Vec3::new(0.0, ramp_height, 0.0),
             Vec3::new(-PLANE_SIZE / 2.0, ramp_height, 0.0),
             Vec3::new(0.0, 0.0, ramp_length),
-        ));
+        ))
+        .with_children(|parent| {
+            parent.spawn_bundle(PbrBundle {
+                mesh: ramp_plane_handle.clone(),
+                material: ramp_material_handle.clone(),
+                transform: Transform::from_translation(Vec3::new(
+                    -0.25 * PLANE_SIZE,
+                    half_ramp_height,
+                    0.25 * PLANE_SIZE,
+                ))
+                .with_rotation(Quat::from_rotation_x(slope_rotation)),
+                ..default()
+            });
+        });
     commands
         .spawn()
         .insert_bundle(TransformBundle::from(
@@ -347,10 +412,9 @@ pub fn setup_arena(
             Vec3::new(0.0, 0.0, 0.0),
             Vec3::new(0.0, 0.0, ramp_length),
         ));
-
     commands
         .spawn()
-        .insert_bundle(TransformBundle::from(
+        .insert_bundle(SpatialBundle::from(
             Transform::from_xyz(
                 -(PLANE_SIZE - (PLANE_SIZE / 2.0)),
                 ground_y_position,
@@ -362,7 +426,20 @@ pub fn setup_arena(
             Vec3::new(0.0, ramp_height, 0.0),
             Vec3::new(-PLANE_SIZE / 2.0, ramp_height, 0.0),
             Vec3::new(0.0, 0.0, ramp_length),
-        ));
+        ))
+        .with_children(|parent| {
+            parent.spawn_bundle(PbrBundle {
+                mesh: ramp_plane_handle.clone(),
+                material: ramp_material_handle.clone(),
+                transform: Transform::from_translation(Vec3::new(
+                    -0.25 * PLANE_SIZE,
+                    half_ramp_height,
+                    0.25 * PLANE_SIZE,
+                ))
+                .with_rotation(Quat::from_rotation_x(slope_rotation)),
+                ..default()
+            });
+        });
     commands
         .spawn()
         .insert_bundle(TransformBundle::from(
