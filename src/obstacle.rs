@@ -1,7 +1,11 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
-use crate::{arena::PLANE_SIZE, combine::Combine, events::SoundSampleEvent};
+use crate::{
+    arena::PLANE_SIZE,
+    combine::{Combine, PLAYER_COMBINE_ID},
+    events::SoundSampleEvent,
+};
 
 const HAY_BALE_DIMENSION: f32 = 9.5;
 
@@ -103,6 +107,24 @@ pub fn spawn_cows(mut commands: Commands, asset_server: Res<AssetServer>) {
         Transform::from_translation(Vec3::new(100.0, 10.0, -(PLANE_SIZE - 100.0))),
         cow_gltf.clone(),
     );
+}
+
+pub fn cow_ai_system(
+    mut cow_query: Query<&mut Transform, With<Cow>>,
+    combine_query: Query<(&Combine, &Transform), Without<Cow>>,
+) {
+    let mut player_combine_opt = Option::None;
+
+    for (combine, transform) in combine_query.iter() {
+        if combine.combine_id == PLAYER_COMBINE_ID {
+            player_combine_opt = Some(transform);
+            break;
+        }
+    }
+
+    for mut cow_transform in cow_query.iter_mut() {
+        cow_transform.look_at(player_combine_opt.unwrap().translation, Vec3::Y);
+    }
 }
 
 fn spawn_cow_with_transform<'w, 's>(

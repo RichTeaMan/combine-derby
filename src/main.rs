@@ -19,7 +19,7 @@ use control::{speed_control_events, steer_control_events};
 use events::{SoundSampleEvent, SpeedControlEvent, SteerControlEvent};
 use input::keyboard_input;
 
-use obstacle::{collision_check_system, spawn_cows, spawn_hay_bales};
+use obstacle::{collision_check_system, spawn_cows, spawn_hay_bales, cow_ai_system};
 use sounds::{play_sample, setup_sounds};
 use ui::{change_text_system, combine_ui_system, infotext_system, update_debug_ui_system};
 
@@ -54,5 +54,6 @@ fn main() {
         .add_system(combine_ui_system)
         .add_system(combine_speedometer_system)
         .add_system(transmission_system)
+        .add_system(cow_ai_system)
         .run();
 }
