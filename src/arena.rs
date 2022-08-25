@@ -15,7 +15,7 @@ pub fn setup_arena(
     let fence_handle = meshes.add(Mesh::from(shape::Quad {
         size: Vec2 {
             x: TILE_SIZE,
-            y: TILE_SIZE,
+            y: TILE_SIZE * 4.0,
         },
         flip: false,
     }));
@@ -54,7 +54,7 @@ pub fn setup_arena(
         )))
         .insert(Friction::coefficient(0.8));
 
-    // actual fence height is enormous
+    // actual fence height is enormous, bigger than the mesh.
     commands
         .spawn()
         .insert(Collider::cuboid(0.1, FENCE_HEIGHT * 10.0, PLANE_SIZE))
@@ -148,6 +148,236 @@ pub fn setup_arena(
             ..default()
         });
     }
+
+    // setup ramps
+
+    let ramp_height = 30.0;
+    let half_ramp_height = ramp_height / 2.0;
+    let ramp_length = PLANE_SIZE / 2.0;
+
+    // ramp 1
+
+    // plinth
+    commands
+        .spawn()
+        .insert_bundle(TransformBundle::from(Transform::from_xyz(
+            PLANE_SIZE - (PLANE_SIZE / 4.0),
+            ground_y_position + half_ramp_height,
+            PLANE_SIZE - (PLANE_SIZE / 4.0),
+        )))
+        .insert(Collider::cuboid(
+            PLANE_SIZE / 4.0,
+            half_ramp_height,
+            PLANE_SIZE / 4.0,
+        ));
+
+    // slope
+    commands
+        .spawn()
+        .insert_bundle(TransformBundle::from(
+            Transform::from_xyz(
+                PLANE_SIZE - (PLANE_SIZE / 2.0),
+                ground_y_position,
+                PLANE_SIZE - (PLANE_SIZE / 2.0),
+            )
+            .with_rotation(Quat::from_rotation_y(180.0_f32.to_radians())),
+        ))
+        .insert(Collider::triangle(
+            Vec3::new(0.0, ramp_height, 0.0),
+            Vec3::new(0.0, 0.0, 0.0),
+            Vec3::new(0.0, 0.0, ramp_length),
+        ));
+
+    commands
+        .spawn()
+        .insert_bundle(TransformBundle::from(
+            Transform::from_xyz(
+                PLANE_SIZE - (PLANE_SIZE / 2.0),
+                ground_y_position,
+                PLANE_SIZE - (PLANE_SIZE / 2.0),
+            )
+            .with_rotation(Quat::from_rotation_y(180.0_f32.to_radians())),
+        ))
+        .insert(Collider::triangle(
+            Vec3::new(0.0, ramp_height, 0.0),
+            Vec3::new(-PLANE_SIZE / 2.0, ramp_height, 0.0),
+            Vec3::new(0.0, 0.0, ramp_length),
+        ));
+    commands
+        .spawn()
+        .insert_bundle(TransformBundle::from(
+            Transform::from_xyz(
+                PLANE_SIZE - (PLANE_SIZE / 2.0),
+                ground_y_position,
+                PLANE_SIZE - (PLANE_SIZE / 2.0),
+            )
+            .with_rotation(Quat::from_rotation_y(180.0_f32.to_radians())),
+        ))
+        .insert(Collider::triangle(
+            Vec3::new(-PLANE_SIZE / 2.0, 0.0, ramp_length),
+            Vec3::new(-PLANE_SIZE / 2.0, ramp_height, 0.0),
+            Vec3::new(0.0, 0.0, ramp_length),
+        ));
+
+    // slope
+    commands
+        .spawn()
+        .insert_bundle(TransformBundle::from(
+            Transform::from_xyz(
+                PLANE_SIZE - (PLANE_SIZE / 2.0),
+                ground_y_position,
+                PLANE_SIZE - (PLANE_SIZE / 2.0),
+            )
+            .with_rotation(Quat::from_rotation_y(-90.0_f32.to_radians())),
+        ))
+        .insert(Collider::triangle(
+            Vec3::new(0.0, ramp_height, 0.0),
+            Vec3::new(0.0, 0.0, 0.0),
+            Vec3::new(0.0, 0.0, ramp_length),
+        ));
+
+    commands
+        .spawn()
+        .insert_bundle(TransformBundle::from(
+            Transform::from_xyz(
+                PLANE_SIZE - (PLANE_SIZE / 2.0),
+                ground_y_position,
+                PLANE_SIZE,
+            )
+            .with_rotation(Quat::from_rotation_y(-90.0_f32.to_radians())),
+        ))
+        .insert(Collider::triangle(
+            Vec3::new(0.0, ramp_height, 0.0),
+            Vec3::new(-PLANE_SIZE / 2.0, ramp_height, 0.0),
+            Vec3::new(0.0, 0.0, ramp_length),
+        ));
+    commands
+        .spawn()
+        .insert_bundle(TransformBundle::from(
+            Transform::from_xyz(
+                PLANE_SIZE - (PLANE_SIZE / 2.0),
+                ground_y_position,
+                PLANE_SIZE,
+            )
+            .with_rotation(Quat::from_rotation_y(-90.0_f32.to_radians())),
+        ))
+        .insert(Collider::triangle(
+            Vec3::new(-PLANE_SIZE / 2.0, 0.0, ramp_length),
+            Vec3::new(-PLANE_SIZE / 2.0, ramp_height, 0.0),
+            Vec3::new(0.0, 0.0, ramp_length),
+        ));
+
+    // ramp 2
+
+    // plinth
+    commands
+        .spawn()
+        .insert_bundle(TransformBundle::from(Transform::from_xyz(
+            -(PLANE_SIZE - (PLANE_SIZE / 4.0)),
+            ground_y_position + half_ramp_height,
+            -(PLANE_SIZE - (PLANE_SIZE / 4.0)),
+        )))
+        .insert(Collider::cuboid(
+            PLANE_SIZE / 4.0,
+            half_ramp_height,
+            PLANE_SIZE / 4.0,
+        ));
+
+    // slope
+    commands
+        .spawn()
+        .insert_bundle(TransformBundle::from(
+            Transform::from_xyz(
+                -(PLANE_SIZE - (PLANE_SIZE / 2.0)),
+                ground_y_position,
+                -(PLANE_SIZE - (PLANE_SIZE / 2.0)),
+            )
+            .with_rotation(Quat::from_rotation_y(90.0_f32.to_radians())),
+        ))
+        .insert(Collider::triangle(
+            Vec3::new(0.0, ramp_height, 0.0),
+            Vec3::new(0.0, 0.0, 0.0),
+            Vec3::new(0.0, 0.0, ramp_length),
+        ));
+
+    commands
+        .spawn()
+        .insert_bundle(TransformBundle::from(
+            Transform::from_xyz(
+                -(PLANE_SIZE - (PLANE_SIZE / 2.0)),
+                ground_y_position,
+                -PLANE_SIZE,
+            )
+            .with_rotation(Quat::from_rotation_y(90.0_f32.to_radians())),
+        ))
+        .insert(Collider::triangle(
+            Vec3::new(0.0, ramp_height, 0.0),
+            Vec3::new(-PLANE_SIZE / 2.0, ramp_height, 0.0),
+            Vec3::new(0.0, 0.0, ramp_length),
+        ));
+    commands
+        .spawn()
+        .insert_bundle(TransformBundle::from(
+            Transform::from_xyz(
+                -(PLANE_SIZE - (PLANE_SIZE / 2.0)),
+                ground_y_position,
+                -PLANE_SIZE,
+            )
+            .with_rotation(Quat::from_rotation_y(90.0_f32.to_radians())),
+        ))
+        .insert(Collider::triangle(
+            Vec3::new(-PLANE_SIZE / 2.0, 0.0, ramp_length),
+            Vec3::new(-PLANE_SIZE / 2.0, ramp_height, 0.0),
+            Vec3::new(0.0, 0.0, ramp_length),
+        ));
+
+    // slope
+    commands
+        .spawn()
+        .insert_bundle(TransformBundle::from(
+            Transform::from_xyz(
+                -(PLANE_SIZE - (PLANE_SIZE / 2.0)),
+                ground_y_position,
+                -(PLANE_SIZE - (PLANE_SIZE / 2.0)),
+            )
+            .with_rotation(Quat::from_rotation_y(0.0_f32.to_radians())),
+        ))
+        .insert(Collider::triangle(
+            Vec3::new(0.0, ramp_height, 0.0),
+            Vec3::new(0.0, 0.0, 0.0),
+            Vec3::new(0.0, 0.0, ramp_length),
+        ));
+
+    commands
+        .spawn()
+        .insert_bundle(TransformBundle::from(
+            Transform::from_xyz(
+                -(PLANE_SIZE - (PLANE_SIZE / 2.0)),
+                ground_y_position,
+                -(PLANE_SIZE - (PLANE_SIZE / 2.0)),
+            )
+            .with_rotation(Quat::from_rotation_y(0.0_f32.to_radians())),
+        ))
+        .insert(Collider::triangle(
+            Vec3::new(0.0, ramp_height, 0.0),
+            Vec3::new(-PLANE_SIZE / 2.0, ramp_height, 0.0),
+            Vec3::new(0.0, 0.0, ramp_length),
+        ));
+    commands
+        .spawn()
+        .insert_bundle(TransformBundle::from(
+            Transform::from_xyz(
+                -(PLANE_SIZE - (PLANE_SIZE / 2.0)),
+                ground_y_position,
+                -(PLANE_SIZE - (PLANE_SIZE / 2.0)),
+            )
+            .with_rotation(Quat::from_rotation_y(0.0_f32.to_radians())),
+        ))
+        .insert(Collider::triangle(
+            Vec3::new(-PLANE_SIZE / 2.0, 0.0, ramp_length),
+            Vec3::new(-PLANE_SIZE / 2.0, ramp_height, 0.0),
+            Vec3::new(0.0, 0.0, ramp_length),
+        ));
 
     // directional 'sun' light
     const HALF_SIZE: f32 = PLANE_SIZE;
