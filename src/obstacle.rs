@@ -1,9 +1,7 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
-use crate::{combine::Combine, events::SoundSampleEvent};
-
-const COW_COUNT: i32 = 1;
+use crate::{arena::PLANE_SIZE, combine::Combine, events::SoundSampleEvent};
 
 const HAY_BALE_DIMENSION: f32 = 9.5;
 
@@ -59,31 +57,79 @@ pub fn spawn_hay_bales(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 pub fn spawn_cows(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let mut _rng = rand::thread_rng();
+    let cow_gltf: Handle<Scene> = asset_server.load("cow.glb#Scene0");
 
-    let bale_gltf: Handle<Scene> = asset_server.load("cow.glb#Scene0");
+    commands = spawn_cow_with_transform(
+        commands,
+        Transform::from_translation(Vec3::new(200.0, 10.0, 100.0)),
+        cow_gltf.clone(),
+    );
+    commands = spawn_cow_with_transform(
+        commands,
+        Transform::from_translation(Vec3::new(100.0, 10.0, 200.0)),
+        cow_gltf.clone(),
+    );
+    commands = spawn_cow_with_transform(
+        commands,
+        Transform::from_translation(Vec3::new(-200.0, 10.0, -100.0)),
+        cow_gltf.clone(),
+    );
+    commands = spawn_cow_with_transform(
+        commands,
+        Transform::from_translation(Vec3::new(-100.0, 10.0, -200.0)),
+        cow_gltf.clone(),
+    );
 
-    for _ in 0..COW_COUNT {
-        commands
-            .spawn()
-            .insert_bundle(SpatialBundle::from(Transform::from_xyz(0.0, 8.0, -40.0)))
-            .insert(RigidBody::Dynamic)
-            .insert(Collider::ball(4.0))
-            .insert(Restitution::coefficient(0.7))
-            .insert(ColliderMassProperties::Density(5.0))
-            //    .insert(ActiveEvents::COLLISION_EVENTS)
-            .insert(ActiveEvents::CONTACT_FORCE_EVENTS)
-            .insert(Cow)
-            .with_children(|parent| {
-                parent.spawn_bundle(SceneBundle {
-                    scene: bale_gltf.clone(),
-                    transform: Transform::from_xyz(0.0, 0.0, 0.0)
-                        .with_rotation(Quat::from_rotation_y(90.0_f32.to_radians()))
-                        .with_scale(Vec3::new(2.0, 2.0, 2.0)),
-                    ..Default::default()
-                });
+    commands = spawn_cow_with_transform(
+        commands,
+        Transform::from_translation(Vec3::new(PLANE_SIZE - 100.0, 10.0, -100.0)),
+        cow_gltf.clone(),
+    );
+
+    commands = spawn_cow_with_transform(
+        commands,
+        Transform::from_translation(Vec3::new(-100.0, 10.0, PLANE_SIZE - 100.0)),
+        cow_gltf.clone(),
+    );
+
+    commands = spawn_cow_with_transform(
+        commands,
+        Transform::from_translation(Vec3::new(-(PLANE_SIZE - 100.0), 10.0, 100.0)),
+        cow_gltf.clone(),
+    );
+
+    spawn_cow_with_transform(
+        commands,
+        Transform::from_translation(Vec3::new(100.0, 10.0, -(PLANE_SIZE - 100.0))),
+        cow_gltf.clone(),
+    );
+}
+
+fn spawn_cow_with_transform<'w, 's>(
+    mut commands: Commands<'w, 's>,
+    transform: Transform,
+    scene_handle: Handle<Scene>,
+) -> Commands<'w, 's> {
+    commands
+        .spawn()
+        .insert_bundle(SpatialBundle::from(transform))
+        .insert(RigidBody::Dynamic)
+        .insert(Collider::ball(8.0))
+        .insert(Restitution::coefficient(0.7))
+        .insert(ColliderMassProperties::Density(5.0))
+        .insert(ActiveEvents::CONTACT_FORCE_EVENTS)
+        .insert(Cow)
+        .with_children(|parent| {
+            parent.spawn_bundle(SceneBundle {
+                scene: scene_handle.clone(),
+                transform: Transform::from_xyz(0.0, 0.0, 0.0)
+                    .with_rotation(Quat::from_rotation_y(90.0_f32.to_radians()))
+                    .with_scale(Vec3::new(4.0, 4.0, 4.0)),
+                ..Default::default()
             });
-    }
+        });
+
+    commands
 }
 
 pub fn collision_check_system(
