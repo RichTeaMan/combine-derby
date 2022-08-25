@@ -6,7 +6,7 @@ use std::{
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
-use crate::camera::CombineCamera;
+use crate::{arena::{PLANE_SIZE, RAMP_HEIGHT}, camera::CombineCamera};
 
 pub const PLAYER_COMBINE_ID: i32 = 1;
 
@@ -61,19 +61,33 @@ pub enum SteeringWheelPosition {
 }
 
 pub fn spawn_combines(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let spawn_position_1 = Transform::from_translation(Vec3::new(
+        PLANE_SIZE - (PLANE_SIZE / 3.0),
+        RAMP_HEIGHT + 4.1,
+        PLANE_SIZE - (PLANE_SIZE / 3.0),
+    ))
+    .with_rotation(Quat::from_rotation_y(45.0_f32.to_radians()));
+
     commands = create_combine(
         commands,
         &asset_server,
         PLAYER_COMBINE_ID,
-        Transform::from_xyz(0.0, 10.0, 0.0),
+        spawn_position_1,
         true,
     );
+
+    let spawn_position_2 = Transform::from_translation(Vec3::new(
+        -(PLANE_SIZE - (PLANE_SIZE / 3.0)),
+        RAMP_HEIGHT + 4.1,
+        -(PLANE_SIZE - (PLANE_SIZE / 3.0)),
+    ))
+    .with_rotation(Quat::from_rotation_y(215.0_f32.to_radians()));
 
     create_combine(
         commands,
         &asset_server,
-        7,
-        Transform::from_xyz(80.0, 10.0, 0.0),
+        2,
+        spawn_position_2,
         false,
     );
 }

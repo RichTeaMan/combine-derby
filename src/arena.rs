@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
-const PLANE_SIZE: f32 = 500.0;
+pub const PLANE_SIZE: f32 = 500.0;
+pub const RAMP_HEIGHT: f32 = 30.0;
 
 pub fn setup_arena(
     mut commands: Commands,
@@ -151,10 +152,9 @@ pub fn setup_arena(
 
     // setup ramps
 
-    let ramp_height: f32 = 30.0;
-    let half_ramp_height = ramp_height / 2.0;
+    let half_ramp_height = RAMP_HEIGHT / 2.0;
     let ramp_length = PLANE_SIZE / 2.0;
-    let slope_rotation = (ramp_height / ramp_length).atan();
+    let slope_rotation = (RAMP_HEIGHT / ramp_length).atan();
 
     let ramp_plane_handle = meshes.add(Mesh::from(shape::Plane {
         size: PLANE_SIZE / 2.0,
@@ -202,7 +202,7 @@ pub fn setup_arena(
             .with_rotation(Quat::from_rotation_y(180.0_f32.to_radians())),
         ))
         .insert(Collider::triangle(
-            Vec3::new(0.0, ramp_height, 0.0),
+            Vec3::new(0.0, RAMP_HEIGHT, 0.0),
             Vec3::new(0.0, 0.0, 0.0),
             Vec3::new(0.0, 0.0, ramp_length),
         ));
@@ -218,8 +218,8 @@ pub fn setup_arena(
             .with_rotation(Quat::from_rotation_y(180.0_f32.to_radians())),
         ))
         .insert(Collider::triangle(
-            Vec3::new(0.0, ramp_height, 0.0),
-            Vec3::new(-PLANE_SIZE / 2.0, ramp_height, 0.0),
+            Vec3::new(0.0, RAMP_HEIGHT, 0.0),
+            Vec3::new(-PLANE_SIZE / 2.0, RAMP_HEIGHT, 0.0),
             Vec3::new(0.0, 0.0, ramp_length),
         ))
         .with_children(|parent| {
@@ -247,7 +247,7 @@ pub fn setup_arena(
         ))
         .insert(Collider::triangle(
             Vec3::new(-PLANE_SIZE / 2.0, 0.0, ramp_length),
-            Vec3::new(-PLANE_SIZE / 2.0, ramp_height, 0.0),
+            Vec3::new(-PLANE_SIZE / 2.0, RAMP_HEIGHT, 0.0),
             Vec3::new(0.0, 0.0, ramp_length),
         ));
 
@@ -263,7 +263,7 @@ pub fn setup_arena(
             .with_rotation(Quat::from_rotation_y(-90.0_f32.to_radians())),
         ))
         .insert(Collider::triangle(
-            Vec3::new(0.0, ramp_height, 0.0),
+            Vec3::new(0.0, RAMP_HEIGHT, 0.0),
             Vec3::new(0.0, 0.0, 0.0),
             Vec3::new(0.0, 0.0, ramp_length),
         ));
@@ -278,8 +278,8 @@ pub fn setup_arena(
             .with_rotation(Quat::from_rotation_y(-90.0_f32.to_radians())),
         ))
         .insert(Collider::triangle(
-            Vec3::new(0.0, ramp_height, 0.0),
-            Vec3::new(-PLANE_SIZE / 2.0, ramp_height, 0.0),
+            Vec3::new(0.0, RAMP_HEIGHT, 0.0),
+            Vec3::new(-PLANE_SIZE / 2.0, RAMP_HEIGHT, 0.0),
             Vec3::new(0.0, 0.0, ramp_length),
         ))
         .with_children(|parent| {
@@ -307,7 +307,7 @@ pub fn setup_arena(
         ))
         .insert(Collider::triangle(
             Vec3::new(-PLANE_SIZE / 2.0, 0.0, ramp_length),
-            Vec3::new(-PLANE_SIZE / 2.0, ramp_height, 0.0),
+            Vec3::new(-PLANE_SIZE / 2.0, RAMP_HEIGHT, 0.0),
             Vec3::new(0.0, 0.0, ramp_length),
         ));
 
@@ -347,7 +347,7 @@ pub fn setup_arena(
             .with_rotation(Quat::from_rotation_y(90.0_f32.to_radians())),
         ))
         .insert(Collider::triangle(
-            Vec3::new(0.0, ramp_height, 0.0),
+            Vec3::new(0.0, RAMP_HEIGHT, 0.0),
             Vec3::new(0.0, 0.0, 0.0),
             Vec3::new(0.0, 0.0, ramp_length),
         ));
@@ -363,8 +363,8 @@ pub fn setup_arena(
             .with_rotation(Quat::from_rotation_y(90.0_f32.to_radians())),
         ))
         .insert(Collider::triangle(
-            Vec3::new(0.0, ramp_height, 0.0),
-            Vec3::new(-PLANE_SIZE / 2.0, ramp_height, 0.0),
+            Vec3::new(0.0, RAMP_HEIGHT, 0.0),
+            Vec3::new(-PLANE_SIZE / 2.0, RAMP_HEIGHT, 0.0),
             Vec3::new(0.0, 0.0, ramp_length),
         ))
         .with_children(|parent| {
@@ -392,7 +392,7 @@ pub fn setup_arena(
         ))
         .insert(Collider::triangle(
             Vec3::new(-PLANE_SIZE / 2.0, 0.0, ramp_length),
-            Vec3::new(-PLANE_SIZE / 2.0, ramp_height, 0.0),
+            Vec3::new(-PLANE_SIZE / 2.0, RAMP_HEIGHT, 0.0),
             Vec3::new(0.0, 0.0, ramp_length),
         ));
 
@@ -408,7 +408,7 @@ pub fn setup_arena(
             .with_rotation(Quat::from_rotation_y(0.0_f32.to_radians())),
         ))
         .insert(Collider::triangle(
-            Vec3::new(0.0, ramp_height, 0.0),
+            Vec3::new(0.0, RAMP_HEIGHT, 0.0),
             Vec3::new(0.0, 0.0, 0.0),
             Vec3::new(0.0, 0.0, ramp_length),
         ));
@@ -423,8 +423,8 @@ pub fn setup_arena(
             .with_rotation(Quat::from_rotation_y(0.0_f32.to_radians())),
         ))
         .insert(Collider::triangle(
-            Vec3::new(0.0, ramp_height, 0.0),
-            Vec3::new(-PLANE_SIZE / 2.0, ramp_height, 0.0),
+            Vec3::new(0.0, RAMP_HEIGHT, 0.0),
+            Vec3::new(-PLANE_SIZE / 2.0, RAMP_HEIGHT, 0.0),
             Vec3::new(0.0, 0.0, ramp_length),
         ))
         .with_children(|parent| {
@@ -452,7 +452,7 @@ pub fn setup_arena(
         ))
         .insert(Collider::triangle(
             Vec3::new(-PLANE_SIZE / 2.0, 0.0, ramp_length),
-            Vec3::new(-PLANE_SIZE / 2.0, ramp_height, 0.0),
+            Vec3::new(-PLANE_SIZE / 2.0, RAMP_HEIGHT, 0.0),
             Vec3::new(0.0, 0.0, ramp_length),
         ));
 
