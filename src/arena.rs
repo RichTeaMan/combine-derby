@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
 pub const PLANE_SIZE: f32 = 500.0;
-pub const RAMP_HEIGHT: f32 = 30.0;
+pub const RAMP_HEIGHT: f32 = 15.0;
 
 pub fn setup_arena(
     mut commands: Commands,

@@ -60,31 +60,31 @@ pub fn steer_control_events(
         control_map.insert(event.combine_id, event.action.clone());
     }
 
-    for mut q in query.iter_mut() {
-        if let Some(action) = control_map.get(&q.0.combine_id) {
+    for (steering_wheel, mut joint) in query.iter_mut() {
+        if let Some(action) = control_map.get(&steering_wheel.combine_id) {
             let mut adjusted_angle = angle;
-            if q.0.steering_wheel_position == SteeringWheelPosition::Left {
+            if steering_wheel.steering_wheel_position == SteeringWheelPosition::Left {
                 adjusted_angle =
-                    calc_left_angle(q.0.combine_wheel_base, q.0.combine_track_width, angle);
-            } else if q.0.steering_wheel_position == SteeringWheelPosition::Right {
+                    calc_left_angle(steering_wheel.combine_wheel_base, steering_wheel.combine_track_width, angle);
+            } else if steering_wheel.steering_wheel_position == SteeringWheelPosition::Right {
                 adjusted_angle =
-                    calc_right_angle(q.0.combine_wheel_base, q.0.combine_track_width, angle);
+                    calc_right_angle(steering_wheel.combine_wheel_base, steering_wheel.combine_track_width, angle);
             }
             match action {
                 SteerControlAction::Left => {
-                    q.1.data
+                    joint.data
                         .set_motor_position(JointAxis::AngX, -adjusted_angle, 1.0, 0.5)
-                        .set_limits(JointAxis::AngX, [-adjusted_angle, straight]);
+                        .set_limits(JointAxis::AngX, [-adjusted_angle, -adjusted_angle]);
                 }
                 SteerControlAction::NoSteer => {
-                    q.1.data
+                    joint.data
                         .set_motor_position(JointAxis::AngX, straight, 1.0, 0.5)
                         .set_limits(JointAxis::AngX, [straight, straight]);
                 }
                 SteerControlAction::Right => {
-                    q.1.data
+                    joint.data
                         .set_motor_position(JointAxis::AngX, adjusted_angle, 1.0, 0.5)
-                        .set_limits(JointAxis::AngX, [straight, adjusted_angle]);
+                        .set_limits(JointAxis::AngX, [adjusted_angle, adjusted_angle]);
                 }
             }
         }

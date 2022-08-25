@@ -32,6 +32,9 @@ impl Combine {
 }
 
 #[derive(Component)]
+pub struct Wheel;
+
+#[derive(Component)]
 pub struct SteeringWheel {
     pub steering_wheel_position: SteeringWheelPosition,
     pub combine_id: i32,
@@ -106,7 +109,7 @@ fn create_combine<'w, 's>(
     let body_density = 10.0;
 
     let wheel_restitution = 0.3;
-    let wheel_friction = 0.8;
+    let wheel_friction = 0.9;
     let wheel_density = 2.0;
 
     let max_wheel_force = f32::MAX; //50000.0;
@@ -168,6 +171,7 @@ fn create_combine<'w, 's>(
         .with_children(|parent| {
             parent
                 .spawn()
+                .insert(Wheel)
                 .insert(Transform::from_rotation(Quat::from_rotation_z(
                     90.0_f32.to_radians(),
                 )))
@@ -193,6 +197,7 @@ fn create_combine<'w, 's>(
         .with_children(|parent| {
             parent
                 .spawn()
+                .insert(Wheel)
                 .insert(Transform::from_rotation(Quat::from_rotation_z(
                     90.0_f32.to_radians(),
                 )))
@@ -218,6 +223,7 @@ fn create_combine<'w, 's>(
         .with_children(|parent| {
             parent
                 .spawn()
+                .insert(Wheel)
                 .insert(Transform::from_rotation(Quat::from_rotation_z(
                     90.0_f32.to_radians(),
                 )))
@@ -243,6 +249,7 @@ fn create_combine<'w, 's>(
         .with_children(|parent| {
             parent
                 .spawn()
+                .insert(Wheel)
                 .insert(Transform::from_rotation(Quat::from_rotation_z(
                     90.0_f32.to_radians(),
                 )))

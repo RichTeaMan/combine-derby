@@ -3,7 +3,7 @@ use bevy_rapier3d::prelude::*;
 
 use crate::{
     arena::PLANE_SIZE,
-    combine::{Combine, PLAYER_COMBINE_ID},
+    combine::{Combine, Wheel, PLAYER_COMBINE_ID},
     events::SoundSampleEvent,
 };
 
@@ -159,6 +159,7 @@ pub fn collision_check_system(
     mut sound_samples_events: EventWriter<SoundSampleEvent>,
     cow_query: Query<&Cow>,
     combine_query: Query<&Combine>,
+    wheel_query: Query<&Wheel>,
 ) {
     for contact_force_event in contact_force_events.iter() {
         let mut hits = 0;
@@ -173,7 +174,12 @@ pub fn collision_check_system(
         } else if let Ok(_) = combine_query.get(contact_force_event.collider2) {
             hits = hits + 1;
         }
-        if hits == 2 {
+        if let Ok(_) = wheel_query.get(contact_force_event.collider1) {
+            hits = hits + 1;
+        } else if let Ok(_) = wheel_query.get(contact_force_event.collider2) {
+            hits = hits + 1;
+        }
+        if hits > 1 {
             sound_samples_events.send(SoundSampleEvent::Cow);
         }
     }
