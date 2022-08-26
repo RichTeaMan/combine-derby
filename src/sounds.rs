@@ -11,13 +11,24 @@ pub struct SoundSamples {
     pub last_moo_time: Duration,
 }
 
-pub fn setup_sounds(mut commands: Commands, asset_server: Res<AssetServer>) {
+pub fn setup_sounds(mut commands: Commands, asset_server: Res<AssetServer>, audio: Res<Audio>) {
     let moo: Handle<AudioSource> = asset_server.load("sounds/moo.ogg");
+
+    let background: Handle<AudioSource> = asset_server.load("sounds/jazzyfrenchy.ogg");
 
     commands.spawn().insert(SoundSamples {
         moo,
         last_moo_time: Duration::ZERO,
     });
+
+    audio.play_with_settings(
+        background,
+        PlaybackSettings {
+            repeat: true,
+            volume: 0.2,
+            ..Default::default()
+        },
+    );
 }
 
 pub fn play_sample(

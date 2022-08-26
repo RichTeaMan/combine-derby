@@ -38,3 +38,5 @@ Soil texture: https://www.deviantart.com/fabooguy/art/Dirt-Ground-Texture-Tileab
 Side hay bale texture: https://create.vista.com/unlimited/stock-photos/220985178/stock-photo-hay-bale-isolated-white-background/
 
 Moo sound: https://www.freesoundslibrary.com/cow-moo-sound/
+
+Background music: https://www.bensound.com/royalty-free-music/track/jazzy-frenchy-upbeat-funny
