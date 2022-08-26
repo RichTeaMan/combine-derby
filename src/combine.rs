@@ -7,6 +7,7 @@ use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
 use crate::{
+    ai::AiState,
     arena::{PLANE_SIZE, RAMP_HEIGHT},
     camera::CombineCamera,
 };
@@ -126,8 +127,9 @@ fn create_combine<'w, 's>(
     let body_gltf: Handle<Scene> = asset_server.load("basic-combine-body.glb#Scene0");
     let wheel_gltf: Handle<Scene> = asset_server.load("basic-wheel.glb#Scene0");
 
-    let body_entity = commands
-        .spawn()
+    let mut body_commands = commands.spawn();
+
+    body_commands
         .insert_bundle(SpatialBundle::from(spawn_transform))
         .insert(Restitution::coefficient(body_restitution))
         .insert(ExternalForce {
@@ -173,8 +175,16 @@ fn create_combine<'w, 's>(
                     ..Default::default()
                 })
                 .insert(CombineCamera { combine_id });
-        })
-        .id();
+        });
+
+    if combine_id != PLAYER_COMBINE_ID {
+        body_commands.insert(AiState {
+            combine_id,
+            ..default()
+        });
+    }
+
+    let body_entity = body_commands.id();
 
     let wheel_0_entity = commands
         .spawn()

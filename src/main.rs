@@ -1,3 +1,4 @@
+mod ai;
 mod arena;
 mod camera;
 mod combine;
@@ -9,6 +10,7 @@ mod obstacle;
 mod sounds;
 mod ui;
 
+use ai::combine_ai_system;
 use arena::setup_arena;
 use bevy::{diagnostic::FrameTimeDiagnosticsPlugin, prelude::*};
 use bevy_rapier3d::prelude::*;
@@ -53,7 +55,8 @@ fn main() {
         .add_system(combine_ui_system)
         .add_system(combine_speedometer_system)
         .add_system(transmission_system)
-        .add_system(cow_ai_system);
+        .add_system(cow_ai_system)
+        .add_system(combine_ai_system);
 
     #[cfg(debug_assertions)]
     {
