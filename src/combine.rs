@@ -6,7 +6,10 @@ use std::{
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
-use crate::{arena::{PLANE_SIZE, RAMP_HEIGHT}, camera::CombineCamera};
+use crate::{
+    arena::{PLANE_SIZE, RAMP_HEIGHT},
+    camera::CombineCamera,
+};
 
 pub const PLAYER_COMBINE_ID: i32 = 1;
 
@@ -86,13 +89,7 @@ pub fn spawn_combines(mut commands: Commands, asset_server: Res<AssetServer>) {
     ))
     .with_rotation(Quat::from_rotation_y(215.0_f32.to_radians()));
 
-    create_combine(
-        commands,
-        &asset_server,
-        2,
-        spawn_position_2,
-        false,
-    );
+    create_combine(commands, &asset_server, 2, spawn_position_2, false);
 }
 
 fn create_combine<'w, 's>(
@@ -108,18 +105,23 @@ fn create_combine<'w, 's>(
     let body_friction = 0.7;
     let body_density = 10.0;
 
-    let wheel_restitution = 0.3;
-    let wheel_friction = 0.9;
-    let wheel_density = 2.0;
+    let wheel_restitution = 0.0;
+    let wheel_friction = 1.8;
+    let wheel_density = 8.0;
 
-    let max_wheel_force = f32::MAX; //50000.0;
+    let wheel_width = 0.2;
+
+    let max_wheel_force = f32::MAX;
     let max_steer_force = f32::MAX;
-    let wheel_factor = 0.0;
+    let wheel_factor = 0.7;
 
     let steering_motor_stiffness = 0.5;
     let steering_motor_damping = 0.5;
 
     let physics = RigidBody::Dynamic;
+
+    let center_of_mass = Vec3::new(0.0, -3.0, -7.0);
+    let ballast_mass = 500.0;
 
     let body_gltf: Handle<Scene> = asset_server.load("basic-combine-body.glb#Scene0");
     let wheel_gltf: Handle<Scene> = asset_server.load("basic-wheel.glb#Scene0");
@@ -137,6 +139,10 @@ fn create_combine<'w, 's>(
         .insert(physics)
         .insert(Collider::cuboid(4.6, 4.0, 9.0))
         .insert(ColliderMassProperties::Density(body_density))
+        .insert(AdditionalMassProperties::MassProperties(MassProperties {
+            local_center_of_mass: center_of_mass,
+            ..Default::default()
+        }))
         .insert(Damping {
             linear_damping: body_linear_damping,
             angular_damping: body_angular_damping,
@@ -149,6 +155,12 @@ fn create_combine<'w, 's>(
                     .with_scale(Vec3::new(2.0, 2.0, 2.0)),
                 ..Default::default()
             });
+
+            parent
+                .spawn()
+                .insert(Collider::cuboid(0.1, 0.1, 0.1))
+                .insert(Transform::from_translation(center_of_mass))
+                .insert(ColliderMassProperties::Density(ballast_mass));
 
             parent
                 .spawn_bundle(Camera3dBundle {
@@ -175,7 +187,7 @@ fn create_combine<'w, 's>(
                 .insert(Transform::from_rotation(Quat::from_rotation_z(
                     90.0_f32.to_radians(),
                 )))
-                .insert(Collider::round_cylinder(0.5, 2.0, 0.25))
+                .insert(Collider::cylinder(wheel_width, 2.0))
                 .insert(Restitution::coefficient(wheel_restitution))
                 .insert(Friction::coefficient(wheel_friction))
                 .insert(ColliderMassProperties::Density(wheel_density));
@@ -201,7 +213,7 @@ fn create_combine<'w, 's>(
                 .insert(Transform::from_rotation(Quat::from_rotation_z(
                     90.0_f32.to_radians(),
                 )))
-                .insert(Collider::round_cylinder(0.5, 2.0, 0.25))
+                .insert(Collider::cylinder(wheel_width, 2.0))
                 .insert(Restitution::coefficient(wheel_restitution))
                 .insert(Friction::coefficient(wheel_friction))
                 .insert(ColliderMassProperties::Density(wheel_density));
@@ -227,7 +239,7 @@ fn create_combine<'w, 's>(
                 .insert(Transform::from_rotation(Quat::from_rotation_z(
                     90.0_f32.to_radians(),
                 )))
-                .insert(Collider::round_cylinder(0.5, 2.0, 0.25))
+                .insert(Collider::cylinder(wheel_width, 2.0))
                 .insert(Restitution::coefficient(wheel_restitution))
                 .insert(Friction::coefficient(wheel_friction))
                 .insert(ColliderMassProperties::Density(wheel_density));
@@ -253,7 +265,7 @@ fn create_combine<'w, 's>(
                 .insert(Transform::from_rotation(Quat::from_rotation_z(
                     90.0_f32.to_radians(),
                 )))
-                .insert(Collider::round_cylinder(0.5, 2.0, 0.25))
+                .insert(Collider::cylinder(wheel_width, 2.0))
                 .insert(Restitution::coefficient(wheel_restitution))
                 .insert(Friction::coefficient(wheel_friction))
                 .insert(ColliderMassProperties::Density(wheel_density));
@@ -284,7 +296,6 @@ fn create_combine<'w, 's>(
 
     let x_shift_1 = 6.5;
     let y_shift_1 = 4.0;
-    //let y_shift_1 = -20.0;
     let z_shift_1 = 8.0;
     let z_shift_rear = 5.0;
 
@@ -309,12 +320,10 @@ fn create_combine<'w, 's>(
         RevoluteJointBuilder::new(x)
             .local_anchor1(Vec3::new(1.0, 0.0, 0.0))
             .local_anchor2(Vec3::new(x_shift_2, y_shift_2, z_shift_2))
-            .motor_velocity(velocity, wheel_factor)
             .motor_max_force(max_wheel_force),
         RevoluteJointBuilder::new(x)
             .local_anchor1(Vec3::new(-1.0, 0.0, 0.0))
             .local_anchor2(Vec3::new(x_shift_2, y_shift_2, z_shift_2))
-            .motor_velocity(velocity, wheel_factor)
             .motor_max_force(max_wheel_force),
     ];
 
@@ -367,13 +376,11 @@ fn create_combine<'w, 's>(
 
     commands
         .entity(wheel_2_entity)
-        .insert(MultibodyJoint::new(steering_rack_left, revs[2]))
-        .insert(DrivingWheel::new(combine_id));
+        .insert(MultibodyJoint::new(steering_rack_left, revs[2]));
 
     commands
         .entity(wheel_3_entity)
-        .insert(MultibodyJoint::new(steering_rack_right, revs[3]))
-        .insert(DrivingWheel::new(combine_id));
+        .insert(MultibodyJoint::new(steering_rack_right, revs[3]));
 
     commands
 }
@@ -409,12 +416,18 @@ pub fn transmission_system(
     let mut combine_map: HashMap<i32, f32> = HashMap::new();
 
     for combine in combine_query.iter() {
-        let mut velocity = 10.0;
+        let factor = 1.33;
+        let constant = 3.0;
+
+        /*let mut velocity = 2.0;
         if combine.velocity > 30.0 {
             velocity = 40.0;
         } else if combine.velocity > 15.0 {
             velocity = 20.0;
-        }
+        }*/
+
+        let velocity = (combine.velocity * factor) + constant;
+
         combine_map.insert(combine.combine_id, velocity);
     }
 

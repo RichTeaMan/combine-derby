@@ -53,7 +53,7 @@ pub fn steer_control_events(
 ) {
     let mut control_map = HashMap::new();
 
-    let angle = 15.0_f32.to_radians();
+    let angle = 25.0_f32.to_radians();
     let straight = 0.0_f32.to_radians();
 
     for event in steer_control_events.iter() {
@@ -64,25 +64,34 @@ pub fn steer_control_events(
         if let Some(action) = control_map.get(&steering_wheel.combine_id) {
             let mut adjusted_angle = angle;
             if steering_wheel.steering_wheel_position == SteeringWheelPosition::Left {
-                adjusted_angle =
-                    calc_left_angle(steering_wheel.combine_wheel_base, steering_wheel.combine_track_width, angle);
+                adjusted_angle = calc_left_angle(
+                    steering_wheel.combine_wheel_base,
+                    steering_wheel.combine_track_width,
+                    angle,
+                );
             } else if steering_wheel.steering_wheel_position == SteeringWheelPosition::Right {
-                adjusted_angle =
-                    calc_right_angle(steering_wheel.combine_wheel_base, steering_wheel.combine_track_width, angle);
+                adjusted_angle = calc_right_angle(
+                    steering_wheel.combine_wheel_base,
+                    steering_wheel.combine_track_width,
+                    angle,
+                );
             }
             match action {
                 SteerControlAction::Left => {
-                    joint.data
+                    joint
+                        .data
                         .set_motor_position(JointAxis::AngX, -adjusted_angle, 1.0, 0.5)
                         .set_limits(JointAxis::AngX, [-adjusted_angle, -adjusted_angle]);
                 }
                 SteerControlAction::NoSteer => {
-                    joint.data
+                    joint
+                        .data
                         .set_motor_position(JointAxis::AngX, straight, 1.0, 0.5)
                         .set_limits(JointAxis::AngX, [straight, straight]);
                 }
                 SteerControlAction::Right => {
-                    joint.data
+                    joint
+                        .data
                         .set_motor_position(JointAxis::AngX, adjusted_angle, 1.0, 0.5)
                         .set_limits(JointAxis::AngX, [adjusted_angle, adjusted_angle]);
                 }

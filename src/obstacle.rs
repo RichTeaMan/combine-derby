@@ -23,7 +23,7 @@ fn spawn_hay_bale_with_transform<'w, 's>(
         .insert(RigidBody::Dynamic)
         .insert(Collider::cylinder(3.72, 4.5))
         .insert(Restitution::coefficient(0.7))
-        .insert(ColliderMassProperties::Density(10.0))
+        .insert(ColliderMassProperties::Density(0.1))
         .with_children(|parent| {
             parent.spawn_bundle(SceneBundle {
                 scene: scene_handle,
@@ -138,7 +138,7 @@ fn spawn_cow_with_transform<'w, 's>(
         .insert(RigidBody::Dynamic)
         .insert(Collider::ball(8.0))
         .insert(Restitution::coefficient(0.7))
-        .insert(ColliderMassProperties::Density(5.0))
+        .insert(ColliderMassProperties::Density(0.5))
         .insert(ActiveEvents::CONTACT_FORCE_EVENTS)
         .insert(Cow)
         .with_children(|parent| {
