@@ -40,3 +40,5 @@ Side hay bale texture: https://create.vista.com/unlimited/stock-photos/220985178
 Moo sound: https://www.freesoundslibrary.com/cow-moo-sound/
 
 Background music: https://www.bensound.com/royalty-free-music/track/jazzy-frenchy-upbeat-funny
+
+Engine sound sampe: https://opengameart.org/content/engine-loop-heavy-vehicletank

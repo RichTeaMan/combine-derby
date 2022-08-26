@@ -3,7 +3,7 @@ pub struct SpeedControlEvent {
     pub action: SpeedControlAction,
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub enum SpeedControlAction {
     Forward,
     Back,
@@ -25,4 +25,6 @@ pub enum SteerControlAction {
 
 pub enum SoundSampleEvent {
     Cow,
+    EnginePower,
+    NoEnginePower,
 }

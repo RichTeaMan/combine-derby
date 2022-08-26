@@ -4,12 +4,16 @@ use bevy::prelude::*;
 use bevy_rapier3d::{prelude::*, rapier::prelude::JointAxis};
 
 use crate::{
-    combine::{DrivingWheel, SteeringWheel, SteeringWheelPosition},
-    events::{SpeedControlAction, SpeedControlEvent, SteerControlAction, SteerControlEvent},
+    combine::{DrivingWheel, SteeringWheel, SteeringWheelPosition, PLAYER_COMBINE_ID},
+    events::{
+        SoundSampleEvent, SpeedControlAction, SpeedControlEvent, SteerControlAction,
+        SteerControlEvent,
+    },
 };
 
 pub fn speed_control_events(
     mut speed_control_events: EventReader<SpeedControlEvent>,
+    mut sound_sample_events: EventWriter<SoundSampleEvent>,
     mut query: Query<(&DrivingWheel, &mut MultibodyJoint)>,
 ) {
     let factor = 0.1;
@@ -17,6 +21,14 @@ pub fn speed_control_events(
     let mut control_map = HashMap::new();
     for event in speed_control_events.iter() {
         control_map.insert(event.combine_id, event.action.clone());
+
+        if event.combine_id == PLAYER_COMBINE_ID {
+            if event.action == SpeedControlAction::NoPower {
+                sound_sample_events.send(SoundSampleEvent::NoEnginePower);
+            } else {
+                sound_sample_events.send(SoundSampleEvent::EnginePower);
+            }
+        }
     }
 
     for (driving_wheel, mut joint) in query.iter_mut() {
