@@ -24,11 +24,10 @@ use sounds::{play_sample, setup_sounds};
 use ui::{change_text_system, combine_ui_system, infotext_system, update_debug_ui_system};
 
 fn main() {
-    App::new()
-        .insert_resource(ClearColor(Color::rgb(0.53, 0.80, 0.92)))
+    let mut app = App::new();
+    app.insert_resource(ClearColor(Color::rgb(0.53, 0.80, 0.92)))
         .add_plugins(DefaultPlugins)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
-        .add_plugin(RapierDebugRenderPlugin::default())
         .add_plugin(FrameTimeDiagnosticsPlugin)
         .add_event::<SpeedControlEvent>()
         .add_event::<SteerControlEvent>()
@@ -54,6 +53,12 @@ fn main() {
         .add_system(combine_ui_system)
         .add_system(combine_speedometer_system)
         .add_system(transmission_system)
-        .add_system(cow_ai_system)
-        .run();
+        .add_system(cow_ai_system);
+
+    #[cfg(debug_assertions)]
+    {
+        app.add_plugin(RapierDebugRenderPlugin::default());
+    }
+
+    app.run();
 }
