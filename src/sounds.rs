@@ -5,10 +5,19 @@ use bevy::{audio::AudioSink, prelude::*};
 use crate::events::SoundSampleEvent;
 
 #[derive(Component)]
+pub struct SoundCollider {
+    pub sound_sample: SoundSampleEvent,
+}
+
+#[derive(Component)]
 pub struct SoundSamples {
     pub moo: Handle<AudioSource>,
 
+    pub hay: Handle<AudioSource>,
+
     pub last_moo_time: Duration,
+
+    pub last_hay_time: Duration,
 
     pub engine_sound_sink: Handle<AudioSink>,
 }
@@ -20,6 +29,7 @@ pub fn setup_sounds(
     audio_sinks: Res<Assets<AudioSink>>,
 ) {
     let moo: Handle<AudioSource> = asset_server.load("sounds/moo.ogg");
+    let hay: Handle<AudioSource> = asset_server.load("sounds/hay1.ogg");
     let engine_sample: Handle<AudioSource> = asset_server.load("sounds/engine_heavy_loop.ogg");
 
     let background: Handle<AudioSource> = asset_server.load("sounds/jazzyfrenchy.ogg");
@@ -44,7 +54,9 @@ pub fn setup_sounds(
 
     commands.spawn().insert(SoundSamples {
         moo,
+        hay,
         last_moo_time: Duration::ZERO,
+        last_hay_time: Duration::ZERO,
         engine_sound_sink: audio_sinks.get_handle(engine_sound_sink),
     });
 }
@@ -75,6 +87,13 @@ pub fn play_sample(
             SoundSampleEvent::NoEnginePower => {
                 if let Some(engine) = audio_sinks.get(&sound_samples.engine_sound_sink) {
                     engine.set_volume(0.2);
+                }
+            }
+            SoundSampleEvent::HayBale => {
+                if time.time_since_startup() > sound_samples.last_hay_time + Duration::from_millis(500)
+                {
+                    audio.play_with_settings(sound_samples.hay.clone(), PlaybackSettings { volume:1.0,..default() });
+                    sound_samples.last_hay_time = time.time_since_startup();
                 }
             }
         }

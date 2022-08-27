@@ -4,7 +4,7 @@ use bevy_rapier3d::prelude::*;
 use crate::{
     arena::PLANE_SIZE,
     combine::{Combine, Wheel, PLAYER_COMBINE_ID},
-    events::SoundSampleEvent,
+    events::SoundSampleEvent, sounds::SoundCollider,
 };
 
 const HAY_BALE_DIMENSION: f32 = 9.5;
@@ -24,6 +24,8 @@ fn spawn_hay_bale_with_transform<'w, 's>(
         .insert(Collider::cylinder(3.72, 4.5))
         .insert(Restitution::coefficient(0.7))
         .insert(ColliderMassProperties::Density(0.1))
+        .insert(SoundCollider {sound_sample: SoundSampleEvent::HayBale})
+        .insert(ActiveEvents::CONTACT_FORCE_EVENTS)
         .with_children(|parent| {
             parent.spawn_bundle(SceneBundle {
                 scene: scene_handle,
@@ -141,6 +143,7 @@ fn spawn_cow_with_transform<'w, 's>(
         .insert(ColliderMassProperties::Density(0.5))
         .insert(ActiveEvents::CONTACT_FORCE_EVENTS)
         .insert(Cow)
+        .insert(SoundCollider {sound_sample: SoundSampleEvent::Cow})
         .with_children(|parent| {
             parent.spawn_bundle(SceneBundle {
                 scene: scene_handle.clone(),
@@ -157,16 +160,19 @@ fn spawn_cow_with_transform<'w, 's>(
 pub fn collision_check_system(
     mut contact_force_events: EventReader<ContactForceEvent>,
     mut sound_samples_events: EventWriter<SoundSampleEvent>,
-    cow_query: Query<&Cow>,
+    sound_collider_query: Query<&SoundCollider>,
     combine_query: Query<&Combine>,
     wheel_query: Query<&Wheel>,
 ) {
     for contact_force_event in contact_force_events.iter() {
         let mut hits = 0;
-        if let Ok(_) = cow_query.get(contact_force_event.collider1) {
+        let mut sound_event_sample = Option::None;
+        if let Ok(a) = sound_collider_query.get(contact_force_event.collider1) {
             hits = hits + 1;
-        } else if let Ok(_) = cow_query.get(contact_force_event.collider2) {
+            sound_event_sample = Some(a.sound_sample.clone());
+        } else if let Ok(b) = sound_collider_query.get(contact_force_event.collider2) {
             hits = hits + 1;
+            sound_event_sample = Some(b.sound_sample.clone());
         }
 
         if let Ok(_) = combine_query.get(contact_force_event.collider1) {
@@ -180,7 +186,7 @@ pub fn collision_check_system(
             hits = hits + 1;
         }
         if hits > 1 {
-            sound_samples_events.send(SoundSampleEvent::Cow);
+            sound_samples_events.send(sound_event_sample.unwrap());
         }
     }
 }

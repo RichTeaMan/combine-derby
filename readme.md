@@ -41,4 +41,6 @@ Moo sound: https://www.freesoundslibrary.com/cow-moo-sound/
 
 Background music: https://www.bensound.com/royalty-free-music/track/jazzy-frenchy-upbeat-funny
 
-Engine sound sampe: https://opengameart.org/content/engine-loop-heavy-vehicletank
+Engine sound sample: https://opengameart.org/content/engine-loop-heavy-vehicletank
+
+Hay sound sample: https://www.youtube.com/watch?v=lMlY5yFZ-b8

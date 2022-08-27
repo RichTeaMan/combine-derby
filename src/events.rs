@@ -23,7 +23,9 @@ pub enum SteerControlAction {
     Right,
 }
 
+#[derive(Clone)]
 pub enum SoundSampleEvent {
+    HayBale,
     Cow,
     EnginePower,
     NoEnginePower,
