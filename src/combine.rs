@@ -80,7 +80,7 @@ fn create_smoke_effect(
     gradient.add_key(0.0, Vec4::new(0.0, 0.0, 0.0, 1.)); // Red
     gradient.add_key(1.0, Vec4::ZERO); // Transparent black
 
-    let effect = effects.add(
+    effects.add(
         EffectAsset {
             name: "combine_smoke".to_string(),
             capacity: 32768,
@@ -101,8 +101,7 @@ fn create_smoke_effect(
         .render(ParticleTextureModifier {
             texture: texture_handle,
         }),
-    );
-    effect
+    )
 }
 
 pub fn spawn_combines(
@@ -139,7 +138,7 @@ pub fn spawn_combines(
     create_combine(
         commands,
         &asset_server,
-        smoke_effect.clone(),
+        smoke_effect,
         2,
         spawn_position_2,
         false,

@@ -110,7 +110,7 @@ pub fn spawn_cows(mut commands: Commands, asset_server: Res<AssetServer>) {
     spawn_cow_with_transform(
         commands,
         Transform::from_translation(Vec3::new(100.0, 10.0, -(PLANE_SIZE - 100.0))),
-        cow_gltf.clone(),
+        cow_gltf,
     );
 }
 
@@ -173,22 +173,22 @@ pub fn collision_check_system(
         let mut hits = 0;
         let mut sound_event_sample = Option::None;
         if let Ok(a) = sound_collider_query.get(contact_force_event.collider1) {
-            hits = hits + 1;
+            hits += 1;
             sound_event_sample = Some(a.sound_sample.clone());
         } else if let Ok(b) = sound_collider_query.get(contact_force_event.collider2) {
-            hits = hits + 1;
+            hits += 1;
             sound_event_sample = Some(b.sound_sample.clone());
         }
 
-        if let Ok(_) = combine_query.get(contact_force_event.collider1) {
-            hits = hits + 1;
-        } else if let Ok(_) = combine_query.get(contact_force_event.collider2) {
-            hits = hits + 1;
+        if combine_query.get(contact_force_event.collider1).is_ok() {
+            hits += 1;
+        } else if combine_query.get(contact_force_event.collider2).is_ok() {
+            hits += 1;
         }
-        if let Ok(_) = wheel_query.get(contact_force_event.collider1) {
-            hits = hits + 1;
-        } else if let Ok(_) = wheel_query.get(contact_force_event.collider2) {
-            hits = hits + 1;
+        if wheel_query.get(contact_force_event.collider1).is_ok() {
+            hits += 1;
+        } else if wheel_query.get(contact_force_event.collider2).is_ok() {
+            hits += 1;
         }
         if hits > 1 {
             sound_samples_events.send(sound_event_sample.unwrap());

@@ -31,7 +31,7 @@ pub fn combine_ai_system(
 ) {
     for (mut ai, combine) in combine_ai_query.iter_mut() {
         if combine.velocity < 0.1 {
-            ai.frames_at_zero_velocity = ai.frames_at_zero_velocity + 1;
+            ai.frames_at_zero_velocity += 1;
         } else {
             ai.frames_at_zero_velocity = 0;
         }

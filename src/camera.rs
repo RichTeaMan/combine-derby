@@ -183,7 +183,7 @@ pub fn camera_events(
                     found_active = true;
                 }
                 combine_camera.1.is_active = false;
-                camera_count = camera_count + 1;
+                camera_count += 1;
             }
 
             if camera_count == 0 || found_active {
