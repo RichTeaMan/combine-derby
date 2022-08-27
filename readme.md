@@ -44,3 +44,5 @@ Background music: https://www.bensound.com/royalty-free-music/track/jazzy-french
 Engine sound sample: https://opengameart.org/content/engine-loop-heavy-vehicletank
 
 Hay sound sample: https://www.youtube.com/watch?v=lMlY5yFZ-b8
+
+Smoke particle: https://www.pngkit.com/downpic/u2q8q8u2o0t4q8t4_fog-png-transparent-images-smoke-particle-texture-png/

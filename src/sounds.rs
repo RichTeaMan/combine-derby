@@ -90,9 +90,16 @@ pub fn play_sample(
                 }
             }
             SoundSampleEvent::HayBale => {
-                if time.time_since_startup() > sound_samples.last_hay_time + Duration::from_millis(500)
+                if time.time_since_startup()
+                    > sound_samples.last_hay_time + Duration::from_millis(500)
                 {
-                    audio.play_with_settings(sound_samples.hay.clone(), PlaybackSettings { volume:1.0,..default() });
+                    audio.play_with_settings(
+                        sound_samples.hay.clone(),
+                        PlaybackSettings {
+                            volume: 1.0,
+                            ..default()
+                        },
+                    );
                     sound_samples.last_hay_time = time.time_since_startup();
                 }
             }

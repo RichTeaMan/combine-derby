@@ -4,7 +4,8 @@ use bevy_rapier3d::prelude::*;
 use crate::{
     arena::PLANE_SIZE,
     combine::{Combine, Wheel, PLAYER_COMBINE_ID},
-    events::SoundSampleEvent, sounds::SoundCollider,
+    events::SoundSampleEvent,
+    sounds::SoundCollider,
 };
 
 const HAY_BALE_DIMENSION: f32 = 9.5;
@@ -24,7 +25,9 @@ fn spawn_hay_bale_with_transform<'w, 's>(
         .insert(Collider::cylinder(3.72, 4.5))
         .insert(Restitution::coefficient(0.7))
         .insert(ColliderMassProperties::Density(0.1))
-        .insert(SoundCollider {sound_sample: SoundSampleEvent::HayBale})
+        .insert(SoundCollider {
+            sound_sample: SoundSampleEvent::HayBale,
+        })
         .insert(ActiveEvents::CONTACT_FORCE_EVENTS)
         .with_children(|parent| {
             parent.spawn_bundle(SceneBundle {
@@ -143,7 +146,9 @@ fn spawn_cow_with_transform<'w, 's>(
         .insert(ColliderMassProperties::Density(0.5))
         .insert(ActiveEvents::CONTACT_FORCE_EVENTS)
         .insert(Cow)
-        .insert(SoundCollider {sound_sample: SoundSampleEvent::Cow})
+        .insert(SoundCollider {
+            sound_sample: SoundSampleEvent::Cow,
+        })
         .with_children(|parent| {
             parent.spawn_bundle(SceneBundle {
                 scene: scene_handle.clone(),
