@@ -5,8 +5,9 @@ use std::{
 
 use bevy::prelude::*;
 use bevy_hanabi::{
-    AccelModifier, ColorOverLifetimeModifier, EffectAsset, Gradient, ParticleEffect,
-    ParticleEffectBundle, ParticleTextureModifier, PositionSphereModifier, ShapeDimension, Spawner,
+    AccelModifier, BillboardModifier, ColorOverLifetimeModifier, EffectAsset, Gradient,
+    ParticleEffect, ParticleEffectBundle, ParticleTextureModifier, PositionSphereModifier,
+    ShapeDimension, Spawner,
 };
 use bevy_rapier3d::prelude::*;
 
@@ -75,40 +76,27 @@ fn create_smoke_effect(
     texture_handle: Handle<Image>,
     mut effects: ResMut<Assets<EffectAsset>>,
 ) -> Handle<EffectAsset> {
-
-    // Define a color gradient
     let mut gradient = Gradient::new();
-    gradient.add_key(0.0, Vec4::splat(1.0));
-    gradient.add_key(0.5, Vec4::splat(1.0));
-    gradient.add_key(1.0, Vec4::new(1.0, 1.0, 1.0, 0.0));
+    gradient.add_key(0.0, Vec4::new(0.0, 0.0, 0.0, 1.)); // Red
+    gradient.add_key(1.0, Vec4::ZERO); // Transparent black
 
-    // Create the effect asset
     let effect = effects.add(
         EffectAsset {
             name: "combine_smoke".to_string(),
-            // Maximum number of particles alive at a time
             capacity: 32768,
-            // Spawn at a rate of 5 particles per second
-            spawner: Spawner::rate(5.0.into()),
-
+            spawner: Spawner::rate(100.0.into()),
             ..Default::default()
         }
-        // On spawn, randomly initialize the position and velocity
-        // of the particle over a sphere of radius 2 units, with a
-        // radial initial velocity of 6 units/sec away from the
-        // sphere center.
         .init(PositionSphereModifier {
             center: Vec3::ZERO,
-            radius: 2.,
+            radius: 0.01,
             dimension: ShapeDimension::Surface,
-            speed: 6.0.into(),
+            speed: 0.5.into(),
         })
-        // Every frame, add a gravity-like acceleration downward
         .update(AccelModifier {
-            accel: Vec3::new(0., 3., 0.),
+            accel: Vec3::new(0., 0.5, 0.),
         })
-        // Render the particles with a color gradient over their
-        // lifetime.
+        .render(BillboardModifier)
         .render(ColorOverLifetimeModifier { gradient })
         .render(ParticleTextureModifier {
             texture: texture_handle,
@@ -129,9 +117,7 @@ pub fn spawn_combines(
     ))
     .with_rotation(Quat::from_rotation_y(45.0_f32.to_radians()));
 
-
     let texture_handle: Handle<Image> = asset_server.load("smoke_particle.png");
-
     let smoke_effect = create_smoke_effect(texture_handle, effects);
 
     commands = create_combine(
@@ -243,10 +229,9 @@ fn create_combine<'w, 's>(
                     ..Default::default()
                 })
                 .insert(CombineCamera { combine_id });
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             parent.spawn_bundle(ParticleEffectBundle {
                 effect: ParticleEffect::new(smoke_effect),
-                transform: Transform::from_translation(Vec3::new(0., 0.3, 0.)),
+                transform: Transform::from_translation(Vec3::new(2.5, 4.0, 6.0)),
                 ..Default::default()
             });
         });
