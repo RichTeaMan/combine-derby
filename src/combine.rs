@@ -177,7 +177,7 @@ fn create_combine<'w, 's>(
     let center_of_mass = Vec3::new(0.0, -3.0, -7.0);
     let ballast_mass = 500.0;
 
-    let body_gltf: Handle<Scene> = asset_server.load("basic-combine-body.glb#Scene0");
+    let body_gltf: Handle<Scene> = asset_server.load("combine-body.glb#Scene0");
     let wheel_gltf: Handle<Scene> = asset_server.load("basic-wheel.glb#Scene0");
 
     let mut body_commands = commands.spawn();
@@ -192,7 +192,7 @@ fn create_combine<'w, 's>(
         .insert(Friction::coefficient(body_friction))
         .insert(Combine::new(combine_id))
         .insert(physics)
-        .insert(Collider::cuboid(4.6, 4.0, 9.0))
+        .insert(Collider::cuboid(3.8, 4.0, 9.0))
         .insert(ColliderMassProperties::Density(body_density))
         .insert(AdditionalMassProperties::MassProperties(MassProperties {
             local_center_of_mass: center_of_mass,
@@ -230,7 +230,7 @@ fn create_combine<'w, 's>(
                 .insert(CombineCamera { combine_id });
             parent.spawn_bundle(ParticleEffectBundle {
                 effect: ParticleEffect::new(smoke_effect),
-                transform: Transform::from_translation(Vec3::new(2.5, 4.0, 6.0)),
+                transform: Transform::from_translation(Vec3::new(2.7, 7.0, 6.0)),
                 ..Default::default()
             });
         });
@@ -362,7 +362,7 @@ fn create_combine<'w, 's>(
         .insert(physics)
         .id();
 
-    let x_shift_1 = 6.5;
+    let x_shift_1 = 4.5;
     let y_shift_1 = 4.0;
     let z_shift_1 = 8.0;
     let z_shift_rear = 5.0;
