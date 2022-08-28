@@ -10,9 +10,16 @@ mod obstacle;
 mod sounds;
 mod ui;
 
+#[cfg(target_arch = "wasm32")]
+pub const ENABLE_PARTICLES: bool = false;
+
+#[cfg(not(target_arch = "wasm32"))]
+pub const ENABLE_PARTICLES: bool = true;
+
 use ai::combine_ai_system;
 use arena::setup_arena;
 use bevy::{diagnostic::FrameTimeDiagnosticsPlugin, prelude::*};
+#[cfg(not(target_arch = "wasm32"))]
 use bevy_hanabi::HanabiPlugin;
 use bevy_rapier3d::prelude::*;
 use camera::{camera_events, SwitchCameraEvent};
@@ -32,7 +39,6 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugin(FrameTimeDiagnosticsPlugin)
-        .add_plugin(HanabiPlugin)
         .add_event::<SpeedControlEvent>()
         .add_event::<SteerControlEvent>()
         .add_event::<SwitchCameraEvent>()
@@ -63,6 +69,11 @@ fn main() {
     #[cfg(debug_assertions)]
     {
         app.add_plugin(RapierDebugRenderPlugin::default());
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        app.add_plugin(HanabiPlugin);
     }
 
     app.run();

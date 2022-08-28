@@ -14,7 +14,7 @@ use bevy_rapier3d::prelude::*;
 use crate::{
     ai::AiState,
     arena::{PLANE_SIZE, RAMP_HEIGHT},
-    camera::CombineCamera,
+    camera::CombineCamera, ENABLE_PARTICLES,
 };
 
 pub const PLAYER_COMBINE_ID: i32 = 1;
@@ -77,8 +77,8 @@ fn create_smoke_effect(
     mut effects: ResMut<Assets<EffectAsset>>,
 ) -> Handle<EffectAsset> {
     let mut gradient = Gradient::new();
-    gradient.add_key(0.0, Vec4::new(0.0, 0.0, 0.0, 1.)); // Red
-    gradient.add_key(1.0, Vec4::ZERO); // Transparent black
+    gradient.add_key(0.0, Vec4::new(0.0, 0.0, 0.0, 1.0));
+    gradient.add_key(1.0, Vec4::ZERO);
 
     effects.add(
         EffectAsset {
@@ -117,12 +117,17 @@ pub fn spawn_combines(
     .with_rotation(Quat::from_rotation_y(45.0_f32.to_radians()));
 
     let texture_handle: Handle<Image> = asset_server.load("smoke_particle.png");
-    let smoke_effect = create_smoke_effect(texture_handle, effects);
+
+    let mut smoke_effect_opt = Option::None;
+
+    if ENABLE_PARTICLES {
+        smoke_effect_opt = Some(create_smoke_effect(texture_handle, effects));
+    }
 
     commands = create_combine(
         commands,
         &asset_server,
-        smoke_effect.clone(),
+        smoke_effect_opt.clone(),
         PLAYER_COMBINE_ID,
         spawn_position_1,
         true,
@@ -138,7 +143,7 @@ pub fn spawn_combines(
     create_combine(
         commands,
         &asset_server,
-        smoke_effect,
+        smoke_effect_opt,
         2,
         spawn_position_2,
         false,
@@ -148,7 +153,7 @@ pub fn spawn_combines(
 fn create_combine<'w, 's>(
     mut commands: Commands<'w, 's>,
     asset_server: &Res<AssetServer>,
-    smoke_effect: Handle<EffectAsset>,
+    smoke_effect_opt: Option<Handle<EffectAsset>>,
     combine_id: i32,
     spawn_transform: Transform,
     active_camera: bool,
@@ -228,11 +233,15 @@ fn create_combine<'w, 's>(
                     ..Default::default()
                 })
                 .insert(CombineCamera { combine_id });
-            parent.spawn_bundle(ParticleEffectBundle {
-                effect: ParticleEffect::new(smoke_effect),
-                transform: Transform::from_translation(Vec3::new(2.5, 4.0, 6.0)),
-                ..Default::default()
-            });
+/*
+            if let Some(smoke_effect) = smoke_effect_opt {
+                parent.spawn_bundle(ParticleEffectBundle {
+                    effect: ParticleEffect::new(smoke_effect),
+                    transform: Transform::from_translation(Vec3::new(2.5, 4.0, 6.0)),
+                    ..Default::default()
+                });
+            }
+            */
         });
 
     if combine_id != PLAYER_COMBINE_ID {
