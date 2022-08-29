@@ -57,14 +57,4 @@ pub fn keyboard_input(
         let mut debug_info = debug_query.single_mut();
         debug_info.enabled = !debug_info.enabled;
     }
-    if keys.just_released(KeyCode::LControl) {
-        // Left Ctrl was released
-    }
-    // we can check multiple at once with `.any_*`
-    if keys.any_pressed([KeyCode::LShift, KeyCode::RShift]) {
-        // Either the left or right shift are being held down
-    }
-    if keys.any_just_pressed([KeyCode::Delete, KeyCode::Back]) {
-        // Either delete or backspace was just pressed
-    }
 }
