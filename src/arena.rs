@@ -27,18 +27,15 @@ pub fn setup_arena(
     let fence_texture = asset_server.load("fence.png");
 
     let ground_material_handle = materials.add(StandardMaterial {
-        base_color: Color::rgb(0.31, 0.21, 0.14),
         base_color_texture: Some(ground_texture),
         normal_map_texture: Some(ground_normal_texture),
         perceptual_roughness: 1.0,
-        unlit: true,
         ..default()
     });
 
     let fence_material_handle = materials.add(StandardMaterial {
         base_color_texture: Some(fence_texture),
         perceptual_roughness: 1.0,
-        unlit: true,
         ..default()
     });
 
@@ -162,7 +159,6 @@ pub fn setup_arena(
     let ramp_material_handle = materials.add(StandardMaterial {
         base_color: Color::rgb(0.66, 0.66, 0.68),
         perceptual_roughness: 0.1,
-        unlit: true,
         ..default()
     });
 
