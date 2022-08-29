@@ -4,11 +4,6 @@ use std::{
 };
 
 use bevy::prelude::*;
-use bevy_hanabi::{
-    AccelModifier, BillboardModifier, ColorOverLifetimeModifier, EffectAsset, Gradient,
-    ParticleEffect, ParticleEffectBundle, ParticleTextureModifier, PositionSphereModifier,
-    ShapeDimension, Spawner,
-};
 use bevy_rapier3d::prelude::*;
 
 use crate::{
@@ -72,43 +67,7 @@ pub enum SteeringWheelPosition {
     Right,
 }
 
-fn create_smoke_effect(
-    texture_handle: Handle<Image>,
-    mut effects: ResMut<Assets<EffectAsset>>,
-) -> Handle<EffectAsset> {
-    let mut gradient = Gradient::new();
-    gradient.add_key(0.0, Vec4::new(0.0, 0.0, 0.0, 1.)); // Red
-    gradient.add_key(1.0, Vec4::ZERO); // Transparent black
-
-    effects.add(
-        EffectAsset {
-            name: "combine_smoke".to_string(),
-            capacity: 32768,
-            spawner: Spawner::rate(100.0.into()),
-            ..Default::default()
-        }
-        .init(PositionSphereModifier {
-            center: Vec3::ZERO,
-            radius: 0.01,
-            dimension: ShapeDimension::Surface,
-            speed: 0.5.into(),
-        })
-        .update(AccelModifier {
-            accel: Vec3::new(0., 0.5, 0.),
-        })
-        .render(BillboardModifier)
-        .render(ColorOverLifetimeModifier { gradient })
-        .render(ParticleTextureModifier {
-            texture: texture_handle,
-        }),
-    )
-}
-
-pub fn spawn_combines(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    effects: ResMut<Assets<EffectAsset>>,
-) {
+pub fn spawn_combines(mut commands: Commands, asset_server: Res<AssetServer>) {
     let spawn_position_1 = Transform::from_translation(Vec3::new(
         PLANE_SIZE - (PLANE_SIZE / 3.0),
         RAMP_HEIGHT + 4.1,
@@ -116,13 +75,9 @@ pub fn spawn_combines(
     ))
     .with_rotation(Quat::from_rotation_y(45.0_f32.to_radians()));
 
-    let texture_handle: Handle<Image> = asset_server.load("smoke_particle.png");
-    let smoke_effect = create_smoke_effect(texture_handle, effects);
-
     commands = create_combine(
         commands,
         &asset_server,
-        smoke_effect.clone(),
         PLAYER_COMBINE_ID,
         spawn_position_1,
         true,
@@ -135,20 +90,12 @@ pub fn spawn_combines(
     ))
     .with_rotation(Quat::from_rotation_y(215.0_f32.to_radians()));
 
-    create_combine(
-        commands,
-        &asset_server,
-        smoke_effect,
-        2,
-        spawn_position_2,
-        false,
-    );
+    create_combine(commands, &asset_server, 2, spawn_position_2, false);
 }
 
 fn create_combine<'w, 's>(
     mut commands: Commands<'w, 's>,
     asset_server: &Res<AssetServer>,
-    smoke_effect: Handle<EffectAsset>,
     combine_id: i32,
     spawn_transform: Transform,
     active_camera: bool,
@@ -228,11 +175,6 @@ fn create_combine<'w, 's>(
                     ..Default::default()
                 })
                 .insert(CombineCamera { combine_id });
-            parent.spawn_bundle(ParticleEffectBundle {
-                effect: ParticleEffect::new(smoke_effect),
-                transform: Transform::from_translation(Vec3::new(2.7, 7.0, 6.0)),
-                ..Default::default()
-            });
         });
 
     if combine_id != PLAYER_COMBINE_ID {

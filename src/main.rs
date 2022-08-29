@@ -13,7 +13,6 @@ mod ui;
 use ai::combine_ai_system;
 use arena::setup_arena;
 use bevy::{diagnostic::FrameTimeDiagnosticsPlugin, prelude::*};
-use bevy_hanabi::HanabiPlugin;
 use bevy_rapier3d::prelude::*;
 use camera::{camera_events, SwitchCameraEvent};
 use combine::{combine_speedometer_system, spawn_combines, transmission_system};
@@ -32,7 +31,6 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugin(FrameTimeDiagnosticsPlugin)
-        .add_plugin(HanabiPlugin)
         .add_event::<SpeedControlEvent>()
         .add_event::<SteerControlEvent>()
         .add_event::<SwitchCameraEvent>()

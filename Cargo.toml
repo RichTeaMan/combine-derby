@@ -15,7 +15,6 @@ opt-level = 3
 
 [dependencies]
 bevy = "0.8.0"
-bevy_hanabi = "0.3.1"
 bevy_rapier3d = "0.16.2"
 build-time = "0.1.2"
 git-version = "0.3.5"
