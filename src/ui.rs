@@ -156,8 +156,6 @@ pub fn change_text_system(
 ) {
     let debug_info = debug_query.single();
 
-    info!("ui enabled? {e}", e = debug_info.enabled);
-
     for mut text in query.iter_mut() {
         if debug_info.enabled {
             let mut fps = 0.0;

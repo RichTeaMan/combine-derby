@@ -8,7 +8,6 @@ pub enum SpeedControlAction {
     Forward,
     Back,
     NoPower,
-    Brake,
 }
 
 pub struct SteerControlEvent {

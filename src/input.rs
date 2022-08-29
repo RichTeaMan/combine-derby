@@ -53,13 +53,6 @@ pub fn keyboard_input(
     if keys.just_pressed(KeyCode::F4) {
         camera_events.send(SwitchCameraEvent);
     }
-
-    if keys.pressed(KeyCode::Space) {
-        speed_control_events.send(SpeedControlEvent {
-            combine_id,
-            action: SpeedControlAction::Brake,
-        });
-    }
     if keys.just_pressed(KeyCode::F3) {
         let mut debug_info = debug_query.single_mut();
         debug_info.enabled = !debug_info.enabled;

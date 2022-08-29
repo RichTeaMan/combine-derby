@@ -50,10 +50,6 @@ pub fn speed_control_events(
                 SpeedControlAction::NoPower => {
                     joint.data.set_motor_velocity(JointAxis::AngX, 0.0, factor);
                 }
-                SpeedControlAction::Brake => {
-                    joint.data.set_motor_velocity(JointAxis::AngX, 0.0, factor);
-                    joint.data.set_limits(JointAxis::AngX, [0.0, 0.0]);
-                }
             }
         }
     }
