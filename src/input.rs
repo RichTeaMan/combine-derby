@@ -4,6 +4,7 @@ use crate::{
     camera::SwitchCameraEvent,
     combine::PLAYER_COMBINE_ID,
     events::{SpeedControlAction, SpeedControlEvent, SteerControlAction, SteerControlEvent},
+    ui::DebugInfo,
 };
 
 pub fn keyboard_input(
@@ -11,6 +12,7 @@ pub fn keyboard_input(
     mut speed_control_events: ResMut<Events<SpeedControlEvent>>,
     mut steer_control_events: ResMut<Events<SteerControlEvent>>,
     mut camera_events: ResMut<Events<SwitchCameraEvent>>,
+    mut debug_query: Query<&mut DebugInfo>,
 ) {
     let combine_id = PLAYER_COMBINE_ID;
 
@@ -57,6 +59,10 @@ pub fn keyboard_input(
             combine_id,
             action: SpeedControlAction::Brake,
         });
+    }
+    if keys.just_pressed(KeyCode::F3) {
+        let mut debug_info = debug_query.single_mut();
+        debug_info.enabled = !debug_info.enabled;
     }
     if keys.just_released(KeyCode::LControl) {
         // Left Ctrl was released

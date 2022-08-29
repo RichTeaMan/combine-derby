@@ -10,6 +10,11 @@ use crate::{
 };
 
 #[derive(Component)]
+pub struct DebugInfo {
+    pub enabled: bool,
+}
+
+#[derive(Component)]
 pub struct TextChanges;
 
 #[derive(Component)]
@@ -24,6 +29,16 @@ pub struct DebugUi;
 pub fn infotext_system(mut commands: Commands, asset_server: Res<AssetServer>) {
     let mono_font = asset_server.load("fonts/FiraMono-Regular.ttf");
     let regular_font: Handle<Font> = asset_server.load("fonts/FiraSans-Bold.ttf");
+
+    #[cfg(debug_assertions)]
+    let debug_enabled = true;
+
+    #[cfg(not(debug_assertions))]
+    let debug_enabled = false;
+
+    commands.spawn().insert(DebugInfo {
+        enabled: debug_enabled,
+    });
 
     commands
         .spawn_bundle(TextBundle {
@@ -137,21 +152,30 @@ pub fn infotext_system(mut commands: Commands, asset_server: Res<AssetServer>) {
 pub fn change_text_system(
     diagnostics: Res<Diagnostics>,
     mut query: Query<&mut Text, With<TextChanges>>,
+    debug_query: Query<&DebugInfo>,
 ) {
-    for mut text in query.iter_mut() {
-        let mut fps = 0.0;
-        if let Some(fps_diagnostic) = diagnostics.get(FrameTimeDiagnosticsPlugin::FPS) {
-            if let Some(fps_avg) = fps_diagnostic.average() {
-                fps = fps_avg;
-            }
-        }
+    let debug_info = debug_query.single();
 
-        text.sections[0].value = format!(
-            "Build {}, {} {:.1} fps",
-            config::GIT_VERSION,
-            config::BUILD_DATE,
-            fps
-        );
+    info!("ui enabled? {e}", e = debug_info.enabled);
+
+    for mut text in query.iter_mut() {
+        if debug_info.enabled {
+            let mut fps = 0.0;
+            if let Some(fps_diagnostic) = diagnostics.get(FrameTimeDiagnosticsPlugin::FPS) {
+                if let Some(fps_avg) = fps_diagnostic.average() {
+                    fps = fps_avg;
+                }
+            }
+
+            text.sections[0].value = format!(
+                "Build {}, {} {:.1} fps",
+                config::GIT_VERSION,
+                config::BUILD_DATE,
+                fps
+            );
+        } else {
+            text.sections[0].value = format!("");
+        }
     }
 }
 
