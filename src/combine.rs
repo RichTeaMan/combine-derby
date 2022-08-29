@@ -421,6 +421,7 @@ pub fn combine_speedometer_system(
 
 pub fn transmission_system(
     combine_query: Query<&Combine>,
+    time: Res<Time>,
     mut drive_wheel_query: Query<&mut DrivingWheel>,
 ) {
     let mut combine_map: HashMap<i32, f32> = HashMap::new();
@@ -438,7 +439,11 @@ pub fn transmission_system(
 
         let velocity = (combine.velocity * factor) + constant;
 
-        combine_map.insert(combine.combine_id, velocity);
+        // compensate for 60fps target
+
+        let adj_velocity = ((time.delta().as_millis() as f32) / (1000.0 / 60.0)) * velocity;
+
+        combine_map.insert(combine.combine_id, adj_velocity);
     }
 
     for mut drive_wheel in drive_wheel_query.iter_mut() {
