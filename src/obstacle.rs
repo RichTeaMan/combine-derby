@@ -70,46 +70,46 @@ pub fn spawn_cows(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     commands = spawn_cow_with_transform(
         commands,
-        Transform::from_translation(Vec3::new(200.0, 10.0, 100.0)),
+        Transform::from_translation(Vec3::new(150.0, 12.0, 50.0)),
         cow_gltf.clone(),
     );
     commands = spawn_cow_with_transform(
         commands,
-        Transform::from_translation(Vec3::new(100.0, 10.0, 200.0)),
+        Transform::from_translation(Vec3::new(50.0, 12.0, 150.0)),
         cow_gltf.clone(),
     );
     commands = spawn_cow_with_transform(
         commands,
-        Transform::from_translation(Vec3::new(-200.0, 10.0, -100.0)),
+        Transform::from_translation(Vec3::new(-200.0, 12.0, -100.0)),
         cow_gltf.clone(),
     );
     commands = spawn_cow_with_transform(
         commands,
-        Transform::from_translation(Vec3::new(-100.0, 10.0, -200.0)),
-        cow_gltf.clone(),
-    );
-
-    commands = spawn_cow_with_transform(
-        commands,
-        Transform::from_translation(Vec3::new(PLANE_SIZE - 100.0, 10.0, -100.0)),
+        Transform::from_translation(Vec3::new(-50.0, 12.0, -150.0)),
         cow_gltf.clone(),
     );
 
     commands = spawn_cow_with_transform(
         commands,
-        Transform::from_translation(Vec3::new(-100.0, 10.0, PLANE_SIZE - 100.0)),
+        Transform::from_translation(Vec3::new(PLANE_SIZE - 100.0, 12.0, -100.0)),
         cow_gltf.clone(),
     );
 
     commands = spawn_cow_with_transform(
         commands,
-        Transform::from_translation(Vec3::new(-(PLANE_SIZE - 100.0), 10.0, 100.0)),
+        Transform::from_translation(Vec3::new(-100.0, 12.0, PLANE_SIZE - 100.0)),
+        cow_gltf.clone(),
+    );
+
+    commands = spawn_cow_with_transform(
+        commands,
+        Transform::from_translation(Vec3::new(-(PLANE_SIZE - 100.0), 12.0, 100.0)),
         cow_gltf.clone(),
     );
 
     spawn_cow_with_transform(
         commands,
-        Transform::from_translation(Vec3::new(100.0, 10.0, -(PLANE_SIZE - 100.0))),
+        Transform::from_translation(Vec3::new(100.0, 12.0, -(PLANE_SIZE - 100.0))),
         cow_gltf,
     );
 }
