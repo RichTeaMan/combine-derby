@@ -172,7 +172,7 @@ pub fn change_text_system(
                 fps
             );
         } else {
-            text.sections[0].value = format!("");
+            text.sections[0].value = String::new();
         }
     }
 }

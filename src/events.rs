@@ -3,7 +3,7 @@ pub struct SpeedControlEvent {
     pub action: SpeedControlAction,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Eq)]
 pub enum SpeedControlAction {
     Forward,
     Back,
