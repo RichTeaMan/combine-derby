@@ -23,14 +23,30 @@ use input::keyboard_input;
 
 use obstacle::{collision_check_system, cow_ai_system, spawn_cows, spawn_hay_bales};
 use sounds::{play_sample, setup_sounds};
-use ui::{change_text_system, combine_ui_system, infotext_system, update_debug_ui_system};
+use ui::{
+    change_text_system, combine_ui_system, infotext_system, update_debug_ui_system, DebugInfo,
+};
 
 fn main() {
-    let mut app = App::new();
-    app.insert_resource(ClearColor(Color::rgb(0.53, 0.80, 0.92)))
-        .add_plugins(DefaultPlugins)
+    let debug_info;
+    #[cfg(debug_assertions)]
+    {
+        debug_info = DebugInfo { enabled: true };
+    }
+    #[cfg(not(debug_assertions))]
+    {
+        debug_info = DebugInfo { enabled: false };
+    }
+
+    App::new().add_plugins(DefaultPlugins)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
+        .add_plugin(RapierDebugRenderPlugin {
+            enabled: debug_info.enabled,
+            ..default()
+        })
         .add_plugin(FrameTimeDiagnosticsPlugin)
+        .insert_resource(ClearColor(Color::rgb(0.53, 0.80, 0.92)))
+        .insert_resource(debug_info)
         .add_event::<SpeedControlEvent>()
         .add_event::<SteerControlEvent>()
         .add_event::<SwitchCameraEvent>()
@@ -56,12 +72,6 @@ fn main() {
         .add_system(combine_speedometer_system)
         .add_system(transmission_system)
         .add_system(cow_ai_system)
-        .add_system(combine_ai_system);
-
-    #[cfg(debug_assertions)]
-    {
-        app.add_plugin(RapierDebugRenderPlugin::default());
-    }
-
-    app.run();
+        .add_system(combine_ai_system)
+        .run()
 }

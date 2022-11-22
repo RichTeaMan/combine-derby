@@ -2,6 +2,7 @@ use bevy::{
     diagnostic::{Diagnostics, FrameTimeDiagnosticsPlugin},
     prelude::*,
 };
+use bevy_rapier3d::render::DebugRenderContext;
 
 use crate::{
     camera,
@@ -9,7 +10,7 @@ use crate::{
     config,
 };
 
-#[derive(Component)]
+#[derive(Resource)]
 pub struct DebugInfo {
     pub enabled: bool,
 }
@@ -29,16 +30,6 @@ pub struct DebugUi;
 pub fn infotext_system(mut commands: Commands, asset_server: Res<AssetServer>) {
     let mono_font = asset_server.load("fonts/FiraMono-Regular.ttf");
     let regular_font: Handle<Font> = asset_server.load("fonts/FiraSans-Bold.ttf");
-
-    #[cfg(debug_assertions)]
-    let debug_enabled = true;
-
-    #[cfg(not(debug_assertions))]
-    let debug_enabled = false;
-
-    commands.spawn(DebugInfo {
-        enabled: debug_enabled,
-    });
 
     commands
         .spawn(TextBundle {
@@ -152,10 +143,10 @@ pub fn infotext_system(mut commands: Commands, asset_server: Res<AssetServer>) {
 pub fn change_text_system(
     diagnostics: Res<Diagnostics>,
     mut query: Query<&mut Text, With<TextChanges>>,
-    debug_query: Query<&DebugInfo>,
+    debug_info: Res<DebugInfo>,
+    mut rapier_render_context: ResMut<DebugRenderContext>,
 ) {
-    let debug_info = debug_query.single();
-
+    rapier_render_context.enabled = debug_info.enabled;
     for mut text in query.iter_mut() {
         if debug_info.enabled {
             let mut fps = 0.0;
