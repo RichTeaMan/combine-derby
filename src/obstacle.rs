@@ -19,8 +19,7 @@ fn spawn_hay_bale_with_transform<'w, 's>(
     scene_handle: Handle<Scene>,
 ) -> Commands<'w, 's> {
     commands
-        .spawn()
-        .insert_bundle(SpatialBundle::from(transform))
+        .spawn(SpatialBundle::from(transform))
         .insert(RigidBody::Dynamic)
         .insert(Collider::cylinder(3.72, 4.5))
         .insert(Restitution::coefficient(0.7))
@@ -30,7 +29,7 @@ fn spawn_hay_bale_with_transform<'w, 's>(
         })
         .insert(ActiveEvents::CONTACT_FORCE_EVENTS)
         .with_children(|parent| {
-            parent.spawn_bundle(SceneBundle {
+            parent.spawn(SceneBundle {
                 scene: scene_handle,
                 transform: Transform::from_xyz(4.5, 0.0, 0.0)
                     .with_rotation(Quat::from_rotation_z(90.0_f32.to_radians()))
@@ -138,8 +137,7 @@ fn spawn_cow_with_transform<'w, 's>(
     scene_handle: Handle<Scene>,
 ) -> Commands<'w, 's> {
     commands
-        .spawn()
-        .insert_bundle(SpatialBundle::from(transform))
+        .spawn(SpatialBundle::from(transform))
         .insert(RigidBody::Dynamic)
         .insert(Collider::ball(8.0))
         .insert(Restitution::coefficient(0.7))
@@ -150,7 +148,7 @@ fn spawn_cow_with_transform<'w, 's>(
             sound_sample: SoundSampleEvent::Cow,
         })
         .with_children(|parent| {
-            parent.spawn_bundle(SceneBundle {
+            parent.spawn(SceneBundle {
                 scene: scene_handle.clone(),
                 transform: Transform::from_xyz(0.0, 0.0, 0.0)
                     .with_rotation(Quat::from_rotation_y(90.0_f32.to_radians()))

@@ -52,7 +52,7 @@ pub fn setup_sounds(
         },
     );
 
-    commands.spawn().insert(SoundSamples {
+    commands.spawn(SoundSamples {
         moo,
         hay,
         last_moo_time: Duration::ZERO,
@@ -73,10 +73,10 @@ pub fn play_sample(
     for sound_sample_event in sound_sample_events.iter() {
         match sound_sample_event {
             SoundSampleEvent::Cow => {
-                if time.time_since_startup() > sound_samples.last_moo_time + Duration::from_secs(5)
+                if time.elapsed() > sound_samples.last_moo_time + Duration::from_secs(5)
                 {
                     audio.play(sound_samples.moo.clone());
-                    sound_samples.last_moo_time = time.time_since_startup();
+                    sound_samples.last_moo_time = time.elapsed();
                 }
             }
             SoundSampleEvent::EnginePower => {
@@ -90,7 +90,7 @@ pub fn play_sample(
                 }
             }
             SoundSampleEvent::HayBale => {
-                if time.time_since_startup()
+                if time.elapsed()
                     > sound_samples.last_hay_time + Duration::from_millis(500)
                 {
                     audio.play_with_settings(
@@ -100,7 +100,7 @@ pub fn play_sample(
                             ..default()
                         },
                     );
-                    sound_samples.last_hay_time = time.time_since_startup();
+                    sound_samples.last_hay_time = time.elapsed();
                 }
             }
         }

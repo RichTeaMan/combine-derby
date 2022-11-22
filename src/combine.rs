@@ -127,10 +127,9 @@ fn create_combine<'w, 's>(
     let body_gltf: Handle<Scene> = asset_server.load("combine-body.glb#Scene0");
     let wheel_gltf: Handle<Scene> = asset_server.load("basic-wheel.glb#Scene0");
 
-    let mut body_commands = commands.spawn();
+    let mut body_commands = commands.spawn(SpatialBundle::from(spawn_transform));
 
     body_commands
-        .insert_bundle(SpatialBundle::from(spawn_transform))
         .insert(Restitution::coefficient(body_restitution))
         .insert(ExternalForce {
             force: Vec3::new(0.0, 0.0, 0.0),
@@ -150,7 +149,7 @@ fn create_combine<'w, 's>(
             angular_damping: body_angular_damping,
         })
         .with_children(|parent| {
-            parent.spawn_bundle(SceneBundle {
+            parent.spawn(SceneBundle {
                 scene: body_gltf,
                 transform: Transform::from_xyz(0.0, -3.1, 0.0)
                     .with_rotation(Quat::from_rotation_y(90.0_f32.to_radians()))
@@ -159,13 +158,12 @@ fn create_combine<'w, 's>(
             });
 
             parent
-                .spawn()
-                .insert(Collider::cuboid(0.1, 0.1, 0.1))
+                .spawn(Collider::cuboid(0.1, 0.1, 0.1))
                 .insert(Transform::from_translation(center_of_mass))
                 .insert(ColliderMassProperties::Density(ballast_mass));
 
             parent
-                .spawn_bundle(Camera3dBundle {
+                .spawn(Camera3dBundle {
                     transform: Transform::from_xyz(0.0, 20.0, 40.0)
                         .with_rotation(Quat::from_rotation_x(-0.4)),
                     camera: Camera {
@@ -187,13 +185,11 @@ fn create_combine<'w, 's>(
     let body_entity = body_commands.id();
 
     let wheel_0_entity = commands
-        .spawn()
-        .insert_bundle(SpatialBundle::from(Transform::from_xyz(0.0, 0.0, 0.0)))
+        .spawn(SpatialBundle::from(Transform::from_xyz(0.0, 0.0, 0.0)))
         .insert(physics)
         .with_children(|parent| {
             parent
-                .spawn()
-                .insert(Wheel)
+                .spawn(Wheel)
                 .insert(Transform::from_rotation(Quat::from_rotation_z(
                     90.0_f32.to_radians(),
                 )))
@@ -202,7 +198,7 @@ fn create_combine<'w, 's>(
                 .insert(Friction::coefficient(wheel_friction))
                 .insert(ColliderMassProperties::Density(wheel_density));
 
-            parent.spawn_bundle(SceneBundle {
+            parent.spawn(SceneBundle {
                 scene: wheel_gltf.clone(),
                 transform: Transform::from_xyz(0.0, 0.0, 0.0)
                     .with_rotation(Quat::from_rotation_y(90.0_f32.to_radians()))
@@ -213,13 +209,11 @@ fn create_combine<'w, 's>(
         .id();
 
     let wheel_1_entity = commands
-        .spawn()
-        .insert_bundle(SpatialBundle::from(Transform::from_xyz(0.0, 0.0, 0.0)))
+        .spawn(SpatialBundle::from(Transform::from_xyz(0.0, 0.0, 0.0)))
         .insert(physics)
         .with_children(|parent| {
             parent
-                .spawn()
-                .insert(Wheel)
+                .spawn(Wheel)
                 .insert(Transform::from_rotation(Quat::from_rotation_z(
                     90.0_f32.to_radians(),
                 )))
@@ -228,7 +222,7 @@ fn create_combine<'w, 's>(
                 .insert(Friction::coefficient(wheel_friction))
                 .insert(ColliderMassProperties::Density(wheel_density));
 
-            parent.spawn_bundle(SceneBundle {
+            parent.spawn(SceneBundle {
                 scene: wheel_gltf.clone(),
                 transform: Transform::from_xyz(0.0, 0.0, 0.0)
                     .with_rotation(Quat::from_rotation_y(-90.0_f32.to_radians()))
@@ -239,13 +233,11 @@ fn create_combine<'w, 's>(
         .id();
 
     let wheel_2_entity = commands
-        .spawn()
-        .insert_bundle(SpatialBundle::from(Transform::from_xyz(0.0, 0.0, 0.0)))
+        .spawn(SpatialBundle::from(Transform::from_xyz(0.0, 0.0, 0.0)))
         .insert(physics)
         .with_children(|parent| {
             parent
-                .spawn()
-                .insert(Wheel)
+                .spawn(Wheel)
                 .insert(Transform::from_rotation(Quat::from_rotation_z(
                     90.0_f32.to_radians(),
                 )))
@@ -254,7 +246,7 @@ fn create_combine<'w, 's>(
                 .insert(Friction::coefficient(wheel_friction))
                 .insert(ColliderMassProperties::Density(wheel_density));
 
-            parent.spawn_bundle(SceneBundle {
+            parent.spawn(SceneBundle {
                 scene: wheel_gltf.clone(),
                 transform: Transform::from_xyz(0.0, 0.0, 0.0)
                     .with_rotation(Quat::from_rotation_y(90.0_f32.to_radians()))
@@ -265,13 +257,11 @@ fn create_combine<'w, 's>(
         .id();
 
     let wheel_3_entity = commands
-        .spawn()
-        .insert_bundle(SpatialBundle::from(Transform::from_xyz(0.0, 0.0, 0.0)))
+        .spawn(SpatialBundle::from(Transform::from_xyz(0.0, 0.0, 0.0)))
         .insert(physics)
         .with_children(|parent| {
             parent
-                .spawn()
-                .insert(Wheel)
+                .spawn(Wheel)
                 .insert(Transform::from_rotation(Quat::from_rotation_z(
                     90.0_f32.to_radians(),
                 )))
@@ -280,7 +270,7 @@ fn create_combine<'w, 's>(
                 .insert(Friction::coefficient(wheel_friction))
                 .insert(ColliderMassProperties::Density(wheel_density));
 
-            parent.spawn_bundle(SceneBundle {
+            parent.spawn(SceneBundle {
                 scene: wheel_gltf,
                 transform: Transform::from_xyz(0.0, 0.0, 0.0)
                     .with_rotation(Quat::from_rotation_y(-90.0_f32.to_radians()))
@@ -291,15 +281,13 @@ fn create_combine<'w, 's>(
         .id();
 
     let steering_rack_left = commands
-        .spawn()
-        .insert_bundle(SpatialBundle::from(Transform::from_xyz(0.0, 0.0, 0.0)))
+        .spawn(SpatialBundle::from(Transform::from_xyz(0.0, 0.0, 0.0)))
         .insert(Collider::cuboid(0.1, 0.1, 0.1))
         .insert(physics)
         .id();
 
     let steering_rack_right = commands
-        .spawn()
-        .insert_bundle(SpatialBundle::from(Transform::from_xyz(0.0, 0.0, 0.0)))
+        .spawn(SpatialBundle::from(Transform::from_xyz(0.0, 0.0, 0.0)))
         .insert(Collider::cuboid(0.1, 0.1, 0.1))
         .insert(physics)
         .id();
@@ -399,7 +387,7 @@ pub fn combine_speedometer_system(
     mut combine_query: Query<(&mut Combine, &Transform)>,
     time: Res<Time>,
 ) {
-    let time_since_startup = time.time_since_startup();
+    let time_since_startup = time.elapsed();
 
     for (mut combine, transform) in combine_query.iter_mut() {
         let vec_length = transform.translation;

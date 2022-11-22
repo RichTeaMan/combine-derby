@@ -36,12 +36,12 @@ pub fn infotext_system(mut commands: Commands, asset_server: Res<AssetServer>) {
     #[cfg(not(debug_assertions))]
     let debug_enabled = false;
 
-    commands.spawn().insert(DebugInfo {
+    commands.spawn(DebugInfo {
         enabled: debug_enabled,
     });
 
     commands
-        .spawn_bundle(TextBundle {
+        .spawn(TextBundle {
             style: Style {
                 align_self: AlignSelf::FlexEnd,
                 position_type: PositionType::Absolute,
@@ -68,7 +68,7 @@ pub fn infotext_system(mut commands: Commands, asset_server: Res<AssetServer>) {
         .insert(TextChanges);
 
     commands
-        .spawn_bundle(TextBundle {
+        .spawn(TextBundle {
             style: Style {
                 align_self: AlignSelf::FlexEnd,
                 position_type: PositionType::Absolute,
@@ -95,7 +95,7 @@ pub fn infotext_system(mut commands: Commands, asset_server: Res<AssetServer>) {
         .insert(SpeedoUi);
 
     commands
-        .spawn_bundle(TextBundle {
+        .spawn(TextBundle {
             style: Style {
                 align_self: AlignSelf::FlexEnd,
                 position_type: PositionType::Absolute,
@@ -122,7 +122,7 @@ pub fn infotext_system(mut commands: Commands, asset_server: Res<AssetServer>) {
         .insert(DescriptionUi);
 
     commands
-        .spawn_bundle(TextBundle {
+        .spawn(TextBundle {
             style: Style {
                 align_self: AlignSelf::FlexEnd,
                 position_type: PositionType::Absolute,
