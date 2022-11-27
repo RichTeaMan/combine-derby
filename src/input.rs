@@ -4,7 +4,7 @@ use crate::{
     camera::SwitchCameraEvent,
     combine::PLAYER_COMBINE_ID,
     events::{SpeedControlAction, SpeedControlEvent, SteerControlAction, SteerControlEvent},
-    ui::DebugInfo,
+    ui::DebugInfo, config::DEFAULT_VOLUME,
 };
 
 #[derive(Resource)]
@@ -14,7 +14,7 @@ pub struct Settings {
 
 impl Default for Settings {
     fn default() -> Self {
-        Self { volume: 1.0 }
+        Self { volume: DEFAULT_VOLUME }
     }
 }
 
