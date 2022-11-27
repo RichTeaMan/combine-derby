@@ -63,6 +63,7 @@ pub fn setup_sounds(
     asset_server: Res<AssetServer>,
     audio: Res<Audio>,
     audio_sinks: Res<Assets<AudioSink>>,
+    settings: Res<Settings>
 ) {
     let moo: Handle<AudioSource> = asset_server.load("sounds/moo.ogg");
     let hay: Handle<AudioSource> = asset_server.load("sounds/hay1.ogg");
@@ -74,7 +75,7 @@ pub fn setup_sounds(
         engine_sample,
         PlaybackSettings {
             repeat: true,
-            volume: ENGINE_IDLE_VOLUME,
+            volume: ENGINE_IDLE_VOLUME * settings.volume,
             ..Default::default()
         },
     );
@@ -83,7 +84,7 @@ pub fn setup_sounds(
         background,
         PlaybackSettings {
             repeat: true,
-            volume: BACKGROUND_SOUND_VOLUME,
+            volume: BACKGROUND_SOUND_VOLUME * settings.volume,
             ..Default::default()
         },
     );
