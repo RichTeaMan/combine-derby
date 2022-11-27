@@ -10,6 +10,14 @@ Combine Derby can be run locally using Cargo:
 cargo run
 ```
 
+## Controls
+
+Move the Combine with WASD.
+
+* F3 to togglee debug info.
+* F4 to switch camera.
+* F6 to toggle sound muting.
+
 ### Building WASM
 
 [Web Assembly](https://webassembly.org/) allows this program to be run in a browser.

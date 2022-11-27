@@ -19,7 +19,7 @@ use combine::{combine_speedometer_system, spawn_combines, transmission_system};
 
 use control::{speed_control_events, steer_control_events};
 use events::{SoundSampleEvent, SpeedControlEvent, SteerControlEvent};
-use input::keyboard_input;
+use input::{keyboard_input, Settings};
 
 use obstacle::{collision_check_system, cow_ai_system, spawn_cows, spawn_hay_bales};
 use sounds::{play_sample, setup_sounds};
@@ -47,6 +47,7 @@ fn main() {
         .add_plugin(FrameTimeDiagnosticsPlugin)
         .insert_resource(ClearColor(Color::rgb(0.53, 0.80, 0.92)))
         .insert_resource(debug_info)
+        .insert_resource(Settings::default())
         .add_event::<SpeedControlEvent>()
         .add_event::<SteerControlEvent>()
         .add_event::<SwitchCameraEvent>()

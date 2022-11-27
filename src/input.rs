@@ -7,12 +7,24 @@ use crate::{
     ui::DebugInfo,
 };
 
+#[derive(Resource)]
+pub struct Settings {
+    pub volume: f32,
+}
+
+impl Default for Settings {
+    fn default() -> Self {
+        Self { volume: 1.0 }
+    }
+}
+
 pub fn keyboard_input(
     keys: Res<Input<KeyCode>>,
     mut speed_control_events: ResMut<Events<SpeedControlEvent>>,
     mut steer_control_events: ResMut<Events<SteerControlEvent>>,
     mut camera_events: ResMut<Events<SwitchCameraEvent>>,
     mut debug_info: ResMut<DebugInfo>,
+    mut settings: ResMut<Settings>,
 ) {
     let combine_id = PLAYER_COMBINE_ID;
 
@@ -55,5 +67,8 @@ pub fn keyboard_input(
     }
     if keys.just_pressed(KeyCode::F3) {
         debug_info.enabled = !debug_info.enabled;
+    }
+    if keys.just_pressed(KeyCode::F6) {
+        settings.volume = if settings.volume > 0.0 { 0.0 } else { 1.0 };
     }
 }
