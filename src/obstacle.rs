@@ -189,7 +189,9 @@ pub fn collision_check_system(
             hits += 1;
         }
         if hits > 1 {
-            sound_samples_events.send(sound_event_sample.unwrap());
+            if let Some(sample) = sound_event_sample {
+                sound_samples_events.send(sample);
+            }
         }
     }
 }

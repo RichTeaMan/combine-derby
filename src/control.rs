@@ -1,10 +1,13 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, f32::consts::PI};
 
 use bevy::prelude::*;
 use bevy_rapier3d::{prelude::*, rapier::prelude::JointAxis};
 
 use crate::{
-    combine::{DrivingWheel, SteeringWheel, SteeringWheelPosition, PLAYER_COMBINE_ID},
+    combine::{
+        BallVehicle, BallVehicleAvatar, DrivingWheel, SteeringWheel, SteeringWheelPosition,
+        PLAYER_COMBINE_ID, DebugEvent,
+    },
     events::{
         SoundSampleEvent, SpeedControlAction, SpeedControlEvent, SteerControlAction,
         SteerControlEvent,
@@ -15,6 +18,8 @@ pub fn speed_control_events(
     mut speed_control_events: EventReader<SpeedControlEvent>,
     mut sound_sample_events: EventWriter<SoundSampleEvent>,
     mut query: Query<(&DrivingWheel, &mut MultibodyJoint)>,
+    mut ball_vehicle_query: Query<(&mut BallVehicle, &mut ExternalImpulse, &Transform)>,
+    mut writer: EventWriter<DebugEvent>,
 ) {
     let factor = 0.1;
 
@@ -53,11 +58,54 @@ pub fn speed_control_events(
             }
         }
     }
+
+    for (mut ball_vehicle, mut impulse, transform) in ball_vehicle_query.iter_mut() {
+        if let Some(action) = control_map.get(&ball_vehicle.combine_id) {
+            let force;
+
+            let fv = ball_vehicle.forward_vector;
+            let sa = ball_vehicle.steering_angle;
+
+            let x = fv.x;
+            let z = fv.z;
+
+            //x' = x cos θ − y sin θ
+            //y' = x sin θ + y cos θ
+
+            ball_vehicle.forward_vector = Vec3::new(
+                (x * ((PI / 180.0) * sa).cos()) - (z * ((PI / 180.0) * sa).sin()),
+                0.0,
+                (x * ((PI / 180.0) * sa).sin()) + (z * ((PI / 180.0) * sa).cos()),
+            );
+            info!(
+                "Steer: {old} -> {new}",
+                old = fv,
+                new = ball_vehicle.forward_vector
+            );
+
+            match action {
+                SpeedControlAction::Forward => {
+                    force = ball_vehicle.forward_vector;
+                }
+                SpeedControlAction::Back => {
+                    force = ball_vehicle.forward_vector * -1.0;
+                }
+                SpeedControlAction::NoPower => {
+                    force = Vec3::ZERO;
+                }
+            }
+            impulse.impulse = force.normalize_or_zero() * ball_vehicle.drive_force;
+            info!("Ball force: {v} -> {f}", v = force, f = impulse.impulse);
+
+            writer.send(DebugEvent::new("bf", &(force.normalize_or_zero() * 5.0)));
+        }
+    }
 }
 
 pub fn steer_control_events(
     mut steer_control_events: EventReader<SteerControlEvent>,
     mut query: Query<(&SteeringWheel, &mut MultibodyJoint)>,
+    mut ball_vehicle_query: Query<(&mut BallVehicle, &Transform)>,
 ) {
     let mut control_map = HashMap::new();
 
@@ -102,6 +150,22 @@ pub fn steer_control_events(
                         .data
                         .set_motor_position(JointAxis::AngX, adjusted_angle, 1.0, 0.5)
                         .set_limits(JointAxis::AngX, [adjusted_angle, adjusted_angle]);
+                }
+            }
+        }
+    }
+
+    for (mut ball_vehicle, transform) in ball_vehicle_query.iter_mut() {
+        if let Some(action) = control_map.get(&ball_vehicle.combine_id) {
+            match action {
+                SteerControlAction::Left => {
+                    ball_vehicle.steering_angle = -ball_vehicle.max_steering_angle;
+                }
+                SteerControlAction::NoSteer => {
+                    ball_vehicle.steering_angle = 0.0;
+                }
+                SteerControlAction::Right => {
+                    ball_vehicle.steering_angle = ball_vehicle.max_steering_angle;
                 }
             }
         }

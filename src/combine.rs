@@ -1,10 +1,11 @@
 use std::{
     collections::{HashMap, VecDeque},
+    f32::consts::PI,
     time::Duration,
 };
 
 use bevy::prelude::*;
-use bevy_rapier3d::prelude::*;
+use bevy_rapier3d::{prelude::*, rapier::prelude::Vector};
 
 use crate::{
     ai::AiState,
@@ -47,6 +48,32 @@ pub struct SteeringWheel {
 }
 
 #[derive(Component)]
+pub struct BallVehicle {
+    pub combine_id: i32,
+    pub drive_force: f32,
+    pub forward_vector: Vec3,
+    pub steering_angle: f32,
+    pub max_steering_angle: f32,
+}
+
+impl BallVehicle {
+    pub fn facing_vector(&self, origin_vector: Vec3) -> Vec3 {
+        
+        let a = self.forward_vector.normalize_or_zero();
+        let b = origin_vector.normalize_or_zero();
+        let g = a - b;
+        let fv = g * 20.0;
+        info!("facing: {a} - {b} = {s} -> {ss}", s = g, ss = fv);
+        fv
+    }
+}
+
+#[derive(Component)]
+pub struct BallVehicleAvatar {
+    pub combine_id: i32,
+}
+
+#[derive(Component)]
 pub struct DrivingWheel {
     pub combine_id: i32,
     pub target_velocity: f32,
@@ -75,7 +102,7 @@ pub fn spawn_combines(mut commands: Commands, asset_server: Res<AssetServer>) {
     ))
     .with_rotation(Quat::from_rotation_y(45.0_f32.to_radians()));
 
-    commands = create_combine(
+    commands = create_ball(
         commands,
         &asset_server,
         PLAYER_COMBINE_ID,
@@ -91,6 +118,291 @@ pub fn spawn_combines(mut commands: Commands, asset_server: Res<AssetServer>) {
     .with_rotation(Quat::from_rotation_y(215.0_f32.to_radians()));
 
     create_combine(commands, &asset_server, 2, spawn_position_2, false);
+}
+
+#[derive(Resource)]
+pub struct DebugResource {
+    mesh: Handle<Mesh>,
+    material: Handle<StandardMaterial>,
+}
+
+#[derive(Component)]
+pub struct DebugCube {
+    pub translation: Vec3,
+    pub id: String,
+}
+
+pub fn setup_shape_debug_system(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    let debug_cube_handle = meshes.add(Mesh::from(shape::Cube { size: 1.0 }));
+    let debug_material_handle = materials.add(StandardMaterial {
+        base_color: Color::Rgba {
+            red: 1.0,
+            blue: 0.0,
+            green: 0.0,
+            alpha: 1.0,
+        },
+        ..default()
+    });
+
+    commands.insert_resource(DebugResource {
+        mesh: debug_cube_handle,
+        material: debug_material_handle,
+    });
+}
+
+pub fn shape_debug_system(
+    mut commands: Commands,
+    mut writer: EventReader<DebugEvent>,
+    debug_resource: Res<DebugResource>,
+    mut debug_cubes: Query<(&DebugCube, &mut Transform)>,
+) {
+    let mut event_map = HashMap::new();
+    for debug_event in writer.iter() {
+        event_map.insert(&debug_event.id, debug_event.translation);
+    }
+
+    for (debug_cube, mut transform) in debug_cubes.iter_mut() {
+        if let Some(debug_cube_translation) = event_map.remove(&debug_cube.id) {
+            transform.translation = debug_cube_translation.clone();
+        }
+    }
+
+    for (id, translation) in event_map {
+        commands
+            .spawn(PbrBundle {
+                mesh: debug_resource.mesh.clone(),
+                material: debug_resource.material.clone(),
+                transform: Transform::from_translation(translation),
+                ..default()
+            })
+            .insert(DebugCube {
+                id: id.to_string(),
+                translation: translation,
+            });
+    }
+}
+
+fn create_ball<'w, 's>(
+    mut commands: Commands<'w, 's>,
+    asset_server: &Res<AssetServer>,
+    combine_id: i32,
+    spawn_transform: Transform,
+    active_camera: bool,
+) -> Commands<'w, 's> {
+    let collider_ball_radius = 4.0;
+
+    let body_linear_damping = 0.0;
+    let body_angular_damping = 0.0;
+    let body_restitution = 0.7;
+    let body_friction = 0.7;
+    let body_density = 10.0;
+
+    let wheel_restitution = 0.0;
+    let wheel_friction = 1.8;
+    let wheel_density = 8.0;
+
+    let wheel_width = 0.2;
+
+    let max_wheel_force = f32::MAX;
+    let max_steer_force = f32::MAX;
+    let wheel_factor = 0.7;
+
+    let steering_motor_stiffness = 0.5;
+    let steering_motor_damping = 0.5;
+
+    let physics = RigidBody::Dynamic;
+
+    let center_of_mass = Vec3::new(0.0, -3.0, -7.0);
+    let ballast_mass = 500.0;
+
+    let body_gltf: Handle<Scene> = asset_server.load("combine-body.glb#Scene0");
+    let wheel_gltf: Handle<Scene> = asset_server.load("basic-wheel.glb#Scene0");
+
+    let mut body_commands = commands.spawn(SpatialBundle::from(spawn_transform));
+
+    body_commands
+        .insert(Restitution::coefficient(body_restitution))
+        .insert(ExternalForce {
+            force: Vec3::ZERO,
+            torque: Vec3::ZERO,
+        })
+        .insert(ExternalImpulse {
+            impulse: Vec3::ZERO,
+            torque_impulse: Vec3::ZERO,
+        })
+        .insert(BallVehicle {
+            combine_id,
+            drive_force: 500.0,
+            forward_vector: spawn_transform.forward(),
+            steering_angle: 0.0,
+            max_steering_angle: 1.0,
+        })
+        .insert(Friction::coefficient(body_friction))
+        .insert(Combine::new(combine_id))
+        .insert(physics)
+        .insert(Collider::ball(collider_ball_radius))
+        .insert(ColliderMassProperties::Density(body_density))
+        //.insert(GravityScale(0.0))
+        .insert(Damping {
+            linear_damping: body_linear_damping,
+            angular_damping: body_angular_damping,
+        })
+        .with_children(|parent| {
+            parent
+                .spawn(SpatialBundle::default())
+                .insert(BallVehicleAvatar { combine_id })
+                .with_children(|parent| {
+                    /*
+                    parent.spawn(SceneBundle {
+                        scene: body_gltf.clone(),
+                        transform: Transform::from_xyz(0.0, -3.1, 0.0)
+                            .with_rotation(Quat::from_rotation_y(90.0_f32.to_radians()))
+                            .with_scale(Vec3::new(0.1, 0.1, 0.1)),
+                        ..Default::default()
+                    });
+                    */
+                    // parent
+                    //     .spawn(Camera3dBundle {
+                    //         transform: Transform::from_xyz(0.0, 20.0, 40.0)
+                    //             .with_rotation(Quat::from_rotation_x(-0.4)),
+                    //         camera: Camera {
+                    //             is_active: active_camera,
+                    //             ..Default::default()
+                    //         },
+                    //         ..Default::default()
+                    //     })
+                    //     .insert(CombineCamera { combine_id });
+                });
+        });
+
+    if combine_id != PLAYER_COMBINE_ID {
+        body_commands.insert(AiState {
+            combine_id,
+            ..default()
+        });
+    }
+
+    let x = Vec3::X;
+    let joint = RevoluteJointBuilder::new(x)
+        .local_anchor1(Vec3::new(0.0, 0.0, 0.0))
+        .local_anchor2(Vec3::new(0.0, 0.0, 0.0));
+
+    let body_entity = body_commands.id();
+    let avatar = commands
+        .spawn(SpatialBundle::from_transform(Transform::from_xyz(
+            0.0, 0.0, 0.0,
+        )))
+        .insert(BallVehicleAvatar { combine_id })
+        //.insert(RigidBody::Dynamic)
+        //.insert(LockedAxes::TRANSLATION_LOCKED | LockedAxes::ROTATION_LOCKED_Z)
+        .with_children(|parent| {
+            parent.spawn(SceneBundle {
+                scene: body_gltf,
+                transform: Transform::IDENTITY
+                    .with_rotation(Quat::from_rotation_y(90.0_f32.to_radians()))
+                    .with_scale(Vec3::new(2.0, 0.2, 0.2)),
+                ..Default::default()
+            });
+            parent
+                .spawn(Camera3dBundle {
+                    transform: Transform::from_xyz(0.0, 20.0, 40.0)
+                        .with_rotation(Quat::from_rotation_x(-0.4)),
+                    camera: Camera {
+                        is_active: active_camera,
+                        ..Default::default()
+                    },
+                    ..Default::default()
+                })
+                .insert(CombineCamera { combine_id });
+        })
+        .id();
+
+    //commands
+    //    .entity(avatar)
+    //    .insert(MultibodyJoint::new(body_entity, joint));
+    //commands
+    //.entity(body_entity)
+    //.insert(ImpulseJoint::new(avatar, joint));
+
+    commands
+}
+
+pub struct DebugEvent {
+    id: String,
+    translation: Vec3,
+}
+
+impl DebugEvent {
+    pub fn new(id: &str, translation: &Vec3) -> DebugEvent {
+        DebugEvent {
+            id: id.to_string(),
+            translation: translation.clone(),
+        }
+    }
+}
+
+pub fn ball_avatar_sytem(
+    mut writer: EventWriter<DebugEvent>,
+    ball_vehicle_query: Query<(&BallVehicle, &Transform), Without<BallVehicleAvatar>>,
+    mut ball_vehicle_avatar_query: Query<
+        (&BallVehicleAvatar, &mut Transform),
+        Without<BallVehicle>,
+    >,
+) {
+    let mut transform_map = HashMap::new();
+    for (ball_vehicle, transform) in ball_vehicle_query.iter() {
+        transform_map.insert(
+            ball_vehicle.combine_id,
+            (transform, ball_vehicle.facing_vector(transform.translation)),
+        );
+    }
+
+    for (ball_vehicle_avatar, mut transform) in ball_vehicle_avatar_query.iter_mut() {
+        if let Some((ball_vehicle_transform, forward_vector)) =
+            transform_map.get(&ball_vehicle_avatar.combine_id)
+        {
+            transform.translation = ball_vehicle_transform.translation.clone();
+
+            // calculate rotation from forward vector
+            transform.look_at(*forward_vector, Vec3::Y);
+
+            writer.send(DebugEvent::new("6969", forward_vector));
+            info!("look at {l}", l = forward_vector);
+        }
+    }
+}
+
+pub fn ball_vehicle_debug_system(
+    mut query: Query<(&BallVehicleAvatar, &mut Transform, &GlobalTransform), Without<DebugCube>>,
+    mut d_query: Query<(&DebugCube, &mut Transform), Without<BallVehicleAvatar>>,
+) {
+    for (_, mut transform, global_transform) in query.iter_mut() {
+        let (x, y, z) = global_transform
+            .compute_transform()
+            .rotation
+            .to_euler(EulerRot::XYZ);
+
+        // correction angle. we want -pi.
+
+        let correction = -x;
+
+        transform.rotate_x(correction);
+        //transform.rotation = Quat::IDENTITY;
+        //info!(
+        //    "Level -> correction: {c} global angle: {a}",
+        //    c = correction,
+        //    a = z
+        //);
+        //info!("X {x:.2} Y {y:.2} Z {z:.2}");
+
+        let v = transform.forward() * 10.0;
+        //info!("D: {v}");
+        d_query.single_mut().1.translation = v;
+    }
 }
 
 fn create_combine<'w, 's>(

@@ -2,14 +2,14 @@ use std::time::Duration;
 
 use bevy::{audio::AudioSink, prelude::*};
 
-use crate::events::SoundSampleEvent;
+use crate::{config, events::SoundSampleEvent};
 
 #[derive(Component)]
 pub struct SoundCollider {
     pub sound_sample: SoundSampleEvent,
 }
 
-#[derive(Component)]
+#[derive(Resource)]
 pub struct SoundSamples {
     pub moo: Handle<AudioSource>,
 
@@ -34,11 +34,17 @@ pub fn setup_sounds(
 
     let background: Handle<AudioSource> = asset_server.load("sounds/jazzyfrenchy.ogg");
 
+    let sound_factor;
+    if config::SOUND_ENABLED {
+        sound_factor = 1.0;
+    } else {
+        sound_factor = 0.0;
+    }
     let engine_sound_sink = audio.play_with_settings(
         engine_sample,
         PlaybackSettings {
             repeat: true,
-            volume: 0.1,
+            volume: 0.1 * sound_factor,
             ..Default::default()
         },
     );
@@ -47,12 +53,11 @@ pub fn setup_sounds(
         background,
         PlaybackSettings {
             repeat: true,
-            volume: 0.2,
+            volume: 0.2 * sound_factor,
             ..Default::default()
         },
     );
-
-    commands.spawn(SoundSamples {
+    commands.insert_resource(SoundSamples {
         moo,
         hay,
         last_moo_time: Duration::ZERO,
@@ -63,13 +68,14 @@ pub fn setup_sounds(
 
 pub fn play_sample(
     mut sound_sample_events: EventReader<SoundSampleEvent>,
-    mut sound_samples_query: Query<&mut SoundSamples>,
+    mut sound_samples: ResMut<SoundSamples>,
     audio: Res<Audio>,
     time: Res<Time>,
     audio_sinks: Res<Assets<AudioSink>>,
 ) {
-    let mut sound_samples = sound_samples_query.single_mut();
-
+    if !config::SOUND_ENABLED {
+        return;
+    }
     for sound_sample_event in sound_sample_events.iter() {
         match sound_sample_event {
             SoundSampleEvent::Cow => {

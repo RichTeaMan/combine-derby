@@ -15,7 +15,7 @@ use arena::setup_arena;
 use bevy::{diagnostic::FrameTimeDiagnosticsPlugin, prelude::*};
 use bevy_rapier3d::prelude::*;
 use camera::{camera_events, SwitchCameraEvent};
-use combine::{combine_speedometer_system, spawn_combines, transmission_system};
+use combine::{combine_speedometer_system, spawn_combines, transmission_system, ball_vehicle_debug_system, ball_avatar_sytem, DebugEvent, setup_shape_debug_system, shape_debug_system};
 
 use control::{speed_control_events, steer_control_events};
 use events::{SoundSampleEvent, SpeedControlEvent, SteerControlEvent};
@@ -51,13 +51,15 @@ fn main() {
         .add_event::<SteerControlEvent>()
         .add_event::<SwitchCameraEvent>()
         .add_event::<SoundSampleEvent>()
+        .add_event::<DebugEvent>()
         .add_startup_system(setup_arena)
         .add_startup_system(setup_sounds)
         .add_startup_system(spawn_combines)
         .add_startup_system(camera::spawn_camera)
         .add_startup_system(infotext_system)
-        .add_startup_system(spawn_hay_bales)
-        .add_startup_system(spawn_cows)
+        .add_startup_system(setup_shape_debug_system)
+        //.add_startup_system(spawn_hay_bales)
+        //.add_startup_system(spawn_cows)
         .add_system(camera::pan_orbit_camera)
         .add_system(bevy::window::close_on_esc)
         .add_system(keyboard_input)
@@ -73,5 +75,8 @@ fn main() {
         .add_system(transmission_system)
         .add_system(cow_ai_system)
         .add_system(combine_ai_system)
+        //.add_system(ball_vehicle_debug_system)
+        .add_system(ball_avatar_sytem)
+        .add_system(shape_debug_system)
         .run()
 }
