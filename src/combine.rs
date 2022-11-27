@@ -90,7 +90,7 @@ pub fn spawn_combines(mut commands: Commands, asset_server: Res<AssetServer>) {
     ))
     .with_rotation(Quat::from_rotation_y(215.0_f32.to_radians()));
 
-    create_combine(commands, &asset_server, 2, spawn_position_2, false);
+    //create_combine(commands, &asset_server, 2, spawn_position_2, false);
 }
 
 fn create_combine<'w, 's>(
@@ -104,11 +104,11 @@ fn create_combine<'w, 's>(
     let body_angular_damping = 0.0;
     let body_restitution = 0.7;
     let body_friction = 0.7;
-    let body_density = 10.0;
+    let body_density = 0.5;//10.0;
 
     let wheel_restitution = 0.0;
-    let wheel_friction = 1.8;
-    let wheel_density = 8.0;
+    let wheel_friction = 0.0;//1.8;
+    let wheel_density = 0.5;//8.0;
 
     let wheel_width = 0.2;
 
@@ -130,24 +130,22 @@ fn create_combine<'w, 's>(
     let mut body_commands = commands.spawn(SpatialBundle::from(spawn_transform));
 
     body_commands
-        .insert(Restitution::coefficient(body_restitution))
-        .insert(ExternalForce {
-            force: Vec3::new(0.0, 0.0, 0.0),
-            torque: Vec3::new(0.0, 0.0, 0.0),
-        })
-        .insert(Friction::coefficient(body_friction))
+        //.insert(Restitution::coefficient(body_restitution))
+        //.insert(ExternalForce::default())
+        .insert(ExternalImpulse::default())
+        //.insert(Friction::coefficient(body_friction))
         .insert(Combine::new(combine_id))
         .insert(physics)
         .insert(Collider::cuboid(3.8, 4.0, 9.0))
         .insert(ColliderMassProperties::Density(body_density))
-        .insert(AdditionalMassProperties::MassProperties(MassProperties {
-            local_center_of_mass: center_of_mass,
-            ..Default::default()
-        }))
-        .insert(Damping {
-            linear_damping: body_linear_damping,
-            angular_damping: body_angular_damping,
-        })
+        //.insert(AdditionalMassProperties::MassProperties(MassProperties {
+        //    local_center_of_mass: center_of_mass,
+        //    ..Default::default()
+        //}))
+        //.insert(Damping {
+        //    linear_damping: body_linear_damping,
+        //    angular_damping: body_angular_damping,
+        //})
         .with_children(|parent| {
             parent.spawn(SceneBundle {
                 scene: body_gltf,
@@ -157,10 +155,10 @@ fn create_combine<'w, 's>(
                 ..Default::default()
             });
 
-            parent
-                .spawn(Collider::cuboid(0.1, 0.1, 0.1))
-                .insert(Transform::from_translation(center_of_mass))
-                .insert(ColliderMassProperties::Density(ballast_mass));
+            //parent
+            //    .spawn(Collider::cuboid(0.1, 0.1, 0.1))
+            //    .insert(Transform::from_translation(center_of_mass))
+            //    .insert(ColliderMassProperties::Density(ballast_mass));
 
             parent
                 .spawn(Camera3dBundle {
@@ -189,14 +187,16 @@ fn create_combine<'w, 's>(
         .insert(physics)
         .with_children(|parent| {
             parent
-                .spawn(Wheel)
+                //.spawn(Wheel)
+                .spawn_empty()
                 .insert(Transform::from_rotation(Quat::from_rotation_z(
                     90.0_f32.to_radians(),
                 )))
                 .insert(Collider::cylinder(wheel_width, 2.0))
-                .insert(Restitution::coefficient(wheel_restitution))
-                .insert(Friction::coefficient(wheel_friction))
-                .insert(ColliderMassProperties::Density(wheel_density));
+                //.insert(Restitution::coefficient(wheel_restitution))
+                //.insert(Friction::coefficient(wheel_friction))
+                //.insert(ColliderMassProperties::Density(wheel_density))
+                ;
 
             parent.spawn(SceneBundle {
                 scene: wheel_gltf.clone(),
@@ -308,21 +308,21 @@ fn create_combine<'w, 's>(
         RevoluteJointBuilder::new(x)
             .local_anchor1(Vec3::new(x_shift_1, -y_shift_1, -z_shift_1))
             .local_anchor2(Vec3::new(x_shift_2, y_shift_2, z_shift_2))
-            .motor_velocity(velocity, wheel_factor)
-            .motor_max_force(max_wheel_force),
+            ,//.motor_velocity(velocity, wheel_factor)
+            //.motor_max_force(max_wheel_force),
         RevoluteJointBuilder::new(x)
             .local_anchor1(Vec3::new(-x_shift_1, -y_shift_1, -z_shift_1))
             .local_anchor2(Vec3::new(x_shift_2, y_shift_2, z_shift_2))
-            .motor_velocity(velocity, wheel_factor)
-            .motor_max_force(max_wheel_force),
+            ,//.motor_velocity(velocity, wheel_factor)
+            //.motor_max_force(max_wheel_force),
         RevoluteJointBuilder::new(x)
             .local_anchor1(Vec3::new(1.0, 0.0, 0.0))
             .local_anchor2(Vec3::new(x_shift_2, y_shift_2, z_shift_2))
-            .motor_max_force(max_wheel_force),
+            ,//.motor_max_force(max_wheel_force),
         RevoluteJointBuilder::new(x)
             .local_anchor1(Vec3::new(-1.0, 0.0, 0.0))
             .local_anchor2(Vec3::new(x_shift_2, y_shift_2, z_shift_2))
-            .motor_max_force(max_wheel_force),
+            ,//.motor_max_force(max_wheel_force),
     ];
 
     let steering_left_joint = RevoluteJointBuilder::new(Vec3::Y)
@@ -364,21 +364,23 @@ fn create_combine<'w, 's>(
 
     commands
         .entity(wheel_0_entity)
-        .insert(MultibodyJoint::new(body_entity, revs[0]))
-        .insert(DrivingWheel::new(combine_id));
+        //.insert(MultibodyJoint::new(body_entity, revs[0]))
+        .insert(ImpulseJoint::new(body_entity, revs[0]))
+        ;//.insert(DrivingWheel::new(combine_id));
 
     commands
         .entity(wheel_1_entity)
-        .insert(MultibodyJoint::new(body_entity, revs[1]))
-        .insert(DrivingWheel::new(combine_id));
+        //.insert(MultibodyJoint::new(body_entity, revs[1]))
+        .insert(ImpulseJoint::new(body_entity, revs[1]))
+        ;//.insert(DrivingWheel::new(combine_id));
 
     commands
         .entity(wheel_2_entity)
-        .insert(MultibodyJoint::new(steering_rack_left, revs[2]));
+        .insert(ImpulseJoint::new(steering_rack_left, revs[2]));
 
     commands
         .entity(wheel_3_entity)
-        .insert(MultibodyJoint::new(steering_rack_right, revs[3]));
+        .insert(ImpulseJoint::new(steering_rack_right, revs[3]));
 
     commands
 }

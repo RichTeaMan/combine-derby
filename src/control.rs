@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use bevy_rapier3d::{prelude::*, rapier::prelude::JointAxis};
 
 use crate::{
-    combine::{DrivingWheel, SteeringWheel, SteeringWheelPosition, PLAYER_COMBINE_ID},
+    combine::{DrivingWheel, SteeringWheel, SteeringWheelPosition, PLAYER_COMBINE_ID, Combine},
     events::{
         SoundSampleEvent, SpeedControlAction, SpeedControlEvent, SteerControlAction,
         SteerControlEvent,
@@ -15,6 +15,7 @@ pub fn speed_control_events(
     mut speed_control_events: EventReader<SpeedControlEvent>,
     mut sound_sample_events: EventWriter<SoundSampleEvent>,
     mut query: Query<(&DrivingWheel, &mut MultibodyJoint)>,
+    mut combine_query: Query<(&Combine, &mut ExternalImpulse, &Transform)>
 ) {
     let factor = 0.1;
 
@@ -49,6 +50,25 @@ pub fn speed_control_events(
                 }
                 SpeedControlAction::NoPower => {
                     joint.data.set_motor_velocity(JointAxis::AngX, 0.0, factor);
+                }
+            }
+        }
+    }
+
+    for (combine, mut impulse, transform) in combine_query.iter_mut() {
+
+        if let Some(action) = control_map.get(&combine.combine_id) {
+            match action {
+                SpeedControlAction::Forward => {
+                    impulse.impulse = transform.forward() * 50.0;
+                    info!("forward -> {i}", i = impulse.impulse);
+                }
+                SpeedControlAction::Back => {
+                    impulse.impulse = transform.back() * 25.0;
+                    info!("back -> {i}", i = impulse.impulse);
+                }
+                SpeedControlAction::NoPower => {
+                    impulse.impulse = Vec3::ZERO;
                 }
             }
         }
