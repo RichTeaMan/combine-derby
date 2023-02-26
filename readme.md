@@ -2,6 +2,8 @@
 
 A disappointingly literal take on COMBINE for the [Bevy game jam](https://itch.io/jam/bevy-jam-2).
 
+This project has been reincarnated as a [Godot project](https://github.com/RichTeaMan/combine-derby).
+
 ## Running
 
 Combine Derby can be run locally using Cargo:
